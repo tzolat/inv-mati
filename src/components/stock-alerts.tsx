@@ -178,7 +178,7 @@ export function StockAlerts() {
                   <p className="font-medium">
                     {item.product.name} - {item.variant.name}
                   </p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex place-items-start justify-between gap-2">
                     {item.status === "out-of-stock" ? (
                       <Badge variant="destructive">Out of Stock</Badge>
                     ) : (
@@ -186,7 +186,7 @@ export function StockAlerts() {
                         Low Stock: {item.variant.currentStock}/{item.variant.lowStockThreshold}
                       </Badge>
                     )}
-                    <Button variant="outline" size="sm" onClick={() => openRestockDialog(item.product, item.variant)}>
+                    <Button variant="outline" size="sm" onClick={() => openRestockDialog(item.product, item.variant)} className="-mt-7">
                       <Plus className="mr-1 h-3 w-3" /> Restock
                     </Button>
                   </div>
