@@ -3,7 +3,7 @@ import connectDB from "@/lib/db"
 import Notification from "@/lib/models/notification"
 import mongoose from "mongoose"
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: any) {
   try {
     await connectDB()
 
@@ -33,7 +33,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }:any) {
   try {
     await connectDB()
 

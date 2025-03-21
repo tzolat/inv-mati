@@ -6,7 +6,7 @@ import Link from "next/link"
 import { EditSaleFormSkeleton } from "@/components/skeletons/edit-sale-form-skeleton"
 import { EditSaleForm } from "@/components/edit-sale-form"
 
-export default function EditSalePage({ params }: { params: { id: string } }) {
+export default function EditSalePage({ params }:any) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-4">
