@@ -23,7 +23,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <div className="flex h-screen overflow-hidden">
+          <div className="hidden md:flex h-screen overflow-hidden">
             <Sidebar />
             <div className="flex flex-col flex-1 overflow-hidden">
               <Header />
