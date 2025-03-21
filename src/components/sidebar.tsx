@@ -47,7 +47,7 @@ export default function Sidebar({ className }: SidebarProps) {
     <>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="m-2  md:hidden">
+          <Button variant="outline" size="icon" className="m-2 md:hidden">
             <Package className="h-5 w-5" />
             <span className="sr-only">Toggle Menu</span>
           </Button>
