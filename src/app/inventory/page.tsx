@@ -1,3 +1,4 @@
+'use client'
 import { Suspense } from "react"
 import { InventoryTable } from "@/components/inventory-table"
 import { InventoryFilters } from "@/components/inventory-filters"
@@ -17,9 +18,11 @@ export default function InventoryPage() {
             Add Product
           </Button>
         </Link>
-      </div>
-      <InventoryFilters />
+      </div> 
       <Suspense fallback={<InventoryTableSkeleton />}>
+      
+      <InventoryFilters />
+     
         <InventoryTable />
       </Suspense>
     </div>

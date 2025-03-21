@@ -17,9 +17,10 @@ export default function SalesPage() {
             Record Sale
           </Button>
         </Link>
-      </div>
-      <SalesFilters />
+      </div> 
       <Suspense fallback={<SalesTableSkeleton />}>
+      <SalesFilters />
+     
         <SalesTable />
       </Suspense>
     </div>

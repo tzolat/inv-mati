@@ -10,8 +10,9 @@ export default function ReportsPage() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-3xl font-bold">Reports & Analytics</h1>
-      <ReportsFilters />
-      <Suspense fallback={<ReportsSkeleton />}>
+       <Suspense fallback={<ReportsSkeleton />}>
+       <ReportsFilters />
+     
         <ReportsSummary />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <SalesChart />
