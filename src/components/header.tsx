@@ -127,7 +127,6 @@ export default function Header() {
           <SidebarContent className="w-full" unreadCount={unreadCount} setOpen={setOpen} />
         </SheetContent>
       </Sheet>
-      <SidebarContent className="hidden border-r bg-background md:block" unreadCount={unreadCount} />
       <form onSubmit={handleSearch} className="flex-1 md:flex-initial">
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
