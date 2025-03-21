@@ -15,9 +15,9 @@ import { Trash, Plus, Loader2, Search, ShoppingCart } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import axios from "axios"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./ui/command"
 
 // Define schema for form validation
 const saleItemSchema = z.object({
@@ -350,13 +350,13 @@ export function AddSaleForm() {
                                     </FormControl>
                                   </PopoverTrigger>
                                   <PopoverContent className="w-[300px] p-0" align="start">
-                                    <Command>
-                                      <CommandInput placeholder="Search products..." onValueChange={setSearchQuery} />
-                                      <CommandList>
+                                    <Command className={''}>
+                                      <CommandInput className={''} placeholder="Search products..." onValueChange={setSearchQuery} />
+                                      <CommandList className={''}>
                                         <CommandEmpty>No products found.</CommandEmpty>
-                                        <CommandGroup>
+                                        <CommandGroup className={''}>
                                           {filteredProducts.map((product) => (
-                                            <CommandItem
+                                            <CommandItem className={''}
                                               key={product._id}
                                               value={product._id}
                                               onSelect={() => {
