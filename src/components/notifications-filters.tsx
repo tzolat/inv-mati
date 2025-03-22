@@ -12,14 +12,16 @@ export function NotificationsFilters() {
   const searchParams = useSearchParams()
 
   const [search, setSearch] = useState(searchParams.get("search") || "")
-  const [type, setType] = useState(searchParams.get("type") || "all")
+  const [type, setType] = useState(searchParams.get("type") || "")
+  const [isRead, setIsRead] = useState(searchParams.get("isRead") || "")
 
   // Apply filters automatically when they change
   useEffect(() => {
     const params = new URLSearchParams()
 
     if (search) params.set("search", search)
-    if (type && type !== "all") params.set("type", type)
+    if (type) params.set("type", type)
+    if (isRead) params.set("isRead", isRead)
 
     // Debounce to avoid too many router pushes
     const timer = setTimeout(() => {
@@ -27,16 +29,17 @@ export function NotificationsFilters() {
     }, 500)
 
     return () => clearTimeout(timer)
-  }, [search, type, router])
+  }, [search, type, isRead, router])
 
   const resetFilters = () => {
     setSearch("")
-    setType("all")
+    setType("")
+    setIsRead("")
 
     router.push("/notifications")
   }
 
-  const hasActiveFilters = search || (type && type !== "all")
+  const hasActiveFilters = search || type || isRead
 
   return (
     <div className="space-y-4">
@@ -53,16 +56,32 @@ export function NotificationsFilters() {
             />
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
           <Select value={type} onValueChange={setType}>
-            <SelectTrigger className="sm:w-[200px]">
+            <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="Notification Type" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="inventory">Inventory</SelectItem>
-              <SelectItem value="sales">Sales</SelectItem>
-              <SelectItem value="system">System</SelectItem>
+              <SelectItem value="low_stock">Low Stock</SelectItem>
+              <SelectItem value="new_sale">New Sale</SelectItem>
+              <SelectItem value="price_change">Price Change</SelectItem>
+              <SelectItem value="product_added">Product Added</SelectItem>
+              <SelectItem value="product_updated">Product Updated</SelectItem>
+              <SelectItem value="product_deleted">Product Deleted</SelectItem>
+              <SelectItem value="sale_updated">Sale Updated</SelectItem>
+              <SelectItem value="stock_update">Stock Update</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={isRead} onValueChange={setIsRead}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Read Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="false">Unread</SelectItem>
+              <SelectItem value="true">Read</SelectItem>
             </SelectContent>
           </Select>
         </div>

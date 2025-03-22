@@ -27,6 +27,7 @@ import { BarChart3, Home, Package, Settings, ShoppingCart } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { UserButton } from "@clerk/nextjs"
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 
@@ -180,6 +181,7 @@ export default function Header() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <UserButton/>
       </div>
     </header>
   )

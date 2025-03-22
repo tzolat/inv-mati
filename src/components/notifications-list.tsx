@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Check } from "lucide-react"
+import { Check, AlertCircle } from "lucide-react"
 import { NotificationItem } from "@/components/notification-item"
 import { Pagination } from "@/components/pagination"
 import {
@@ -18,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import axios from "axios"
 
 export function NotificationsList() {
@@ -26,6 +27,7 @@ export function NotificationsList() {
 
   const [notifications, setNotifications] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
@@ -38,33 +40,39 @@ export function NotificationsList() {
   // Get search params
   const type = searchParams.get("type") || ""
   const isRead = searchParams.get("isRead")
+  const search = searchParams.get("search") || ""
   const page = Number.parseInt(searchParams.get("page") || "1")
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         setLoading(true)
+        setError(null)
 
         // Build query string
         const queryParams = new URLSearchParams()
         if (type) queryParams.set("type", type)
         if (isRead === "true" || isRead === "false") queryParams.set("isRead", isRead)
+        if (search) queryParams.set("search", search)
         queryParams.set("page", page.toString())
         queryParams.set("limit", "20")
 
+        console.log("Fetching notifications with params:", queryParams.toString())
         const response = await axios.get(`/api/notifications?${queryParams.toString()}`)
+
         setNotifications(response.data.notifications)
         setPagination(response.data.pagination)
         setUnreadCount(response.data.unreadCount)
       } catch (error) {
         console.error("Error fetching notifications:", error)
+        setError("Failed to load notifications. Please try again.")
       } finally {
         setLoading(false)
       }
     }
 
     fetchNotifications()
-  }, [type, isRead, page])
+  }, [type, isRead, search, page])
 
   const handleMarkAllAsRead = async () => {
     try {
@@ -81,6 +89,7 @@ export function NotificationsList() {
       }
     } catch (error) {
       console.error("Error marking all notifications as read:", error)
+      setError("Failed to mark notifications as read. Please try again.")
     }
   }
 
@@ -112,6 +121,16 @@ export function NotificationsList() {
     )
   }
 
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    )
+  }
+
   if (notifications.length === 0) {
     return (
       <Card>
@@ -119,7 +138,7 @@ export function NotificationsList() {
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <h3 className="text-lg font-medium">No notifications found</h3>
             <p className="mt-2 text-sm text-muted-foreground max-w-sm">
-              {type || isRead
+              {type || isRead || search
                 ? "No notifications match your current filters. Try adjusting your filter criteria."
                 : "You don't have any notifications yet."}
             </p>

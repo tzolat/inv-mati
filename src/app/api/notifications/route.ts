@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
     const searchParams = url.searchParams
     const type = searchParams.get("type") || ""
     const isRead = searchParams.get("isRead") === "true" ? true : searchParams.get("isRead") === "false" ? false : null
+    const search = searchParams.get("search") || ""
     const page = Number.parseInt(searchParams.get("page") || "1")
     const limit = Number.parseInt(searchParams.get("limit") || "20")
     const skip = (page - 1) * limit
@@ -19,6 +20,11 @@ export async function GET(req: NextRequest) {
 
     if (type) query.type = type
     if (isRead !== null) query.isRead = isRead
+    if (search) {
+      query.message = { $regex: search, $options: "i" }
+    }
+
+    console.log("Notification query:", JSON.stringify(query))
 
     // Execute query
     const totalNotifications = await Notification.countDocuments(query)

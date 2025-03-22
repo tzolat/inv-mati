@@ -1,12 +1,11 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-
+import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
 import Header from "@/components/header"
-import { ClerkProvider } from "@clerk/nextjs"
- import '../app/(protected)/globals.css'
+
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
@@ -26,10 +25,15 @@ export default function RootLayout({
       <body className={inter.className}>
      
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-         
-              <main >{children}</main>
-            
-        
+          <div className="flex h-screen overflow-hidden">
+          <div className="hidden md:flex">
+            <Sidebar />
+            </div>
+            <div className="flex flex-col flex-1 overflow-hidden">
+              <Header />
+              <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+            </div>
+          </div>
         </ThemeProvider>
       </body>
     </html>
@@ -39,3 +43,5 @@ export default function RootLayout({
 
 
 
+import './globals.css'
+import { ClerkProvider } from "@clerk/nextjs"
