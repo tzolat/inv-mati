@@ -32,7 +32,7 @@ export default function SignInPage() {
                 },
               }}
               path="/sign-in"
-              signUpUrl="/sign-up" // Updated to provide a valid sign-up URL
+              signUpUrl="/sign-up"
               redirectUrl="/(protected)/" // Ensure this points to a valid route
             />
           </CardContent>
