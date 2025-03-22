@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Search } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from "recharts"
@@ -16,8 +18,11 @@ export function ProductProfitAnalysis() {
     products: [],
     variants: [],
   })
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([])
+  const [filteredVariants, setFilteredVariants] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState("products")
+  const [searchQuery, setSearchQuery] = useState("")
 
   // Get search params
   const startDate = searchParams.get("startDate") || ""
@@ -36,6 +41,8 @@ export function ProductProfitAnalysis() {
         // Fetch product-level profit data
         const response = await axios.get(`/api/reports/product-profits?${queryParams.toString()}`)
         setData(response.data)
+        setFilteredProducts(response.data.products)
+        setFilteredVariants(response.data.variants)
       } catch (error) {
         console.error("Error fetching product profit data:", error)
       } finally {
@@ -45,6 +52,35 @@ export function ProductProfitAnalysis() {
 
     fetchData()
   }, [startDate, endDate])
+
+  // Filter data based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredProducts(data.products)
+      setFilteredVariants(data.variants)
+      return
+    }
+
+    const query = searchQuery.toLowerCase()
+
+    // Filter products
+    const products = data.products.filter(
+      (item: any) =>
+        (item.productName && item.productName.toLowerCase().includes(query)) ||
+        (item.category && item.category.toLowerCase().includes(query)) ||
+        (item.brand && item.brand.toLowerCase().includes(query)),
+    )
+    setFilteredProducts(products)
+
+    // Filter variants
+    const variants = data.variants.filter(
+      (item: any) =>
+        (item.productName && item.productName.toLowerCase().includes(query)) ||
+        (item.variantName && item.variantName.toLowerCase().includes(query)) ||
+        (item.sku && item.sku.toLowerCase().includes(query)),
+    )
+    setFilteredVariants(variants)
+  }, [searchQuery, data])
 
   // Color function for profit margin
   const getProfitMarginColor = (margin: number) => {
@@ -69,21 +105,33 @@ export function ProductProfitAnalysis() {
 
   return (
     <Card className="mt-6">
-      <CardHeader>
-        <CardTitle>Product Profit Analysis</CardTitle>
-        <CardDescription>Profit breakdown by products and variants</CardDescription>
+      <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <CardTitle>Product Profit Analysis</CardTitle>
+          <CardDescription>Profit breakdown by products and variants</CardDescription>
+        </div>
+        <div className="relative w-full sm:w-[300px]">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search products..."
+            className="pl-8"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="products" value={view} onValueChange={setView}>
-          <TabsList className="mb-4">
+          <TabsList className="mb-4 flex flex-wrap">
             <TabsTrigger value="products">By Product</TabsTrigger>
             <TabsTrigger value="variants">By Variant</TabsTrigger>
             <TabsTrigger value="chart">Profit Margin Chart</TabsTrigger>
           </TabsList>
 
           <TabsContent value="products">
-            {data.products.length > 0 ? (
-              <div className="rounded-md border">
+            {filteredProducts.length > 0 ? (
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -98,7 +146,7 @@ export function ProductProfitAnalysis() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.products.map((item: any) => (
+                    {filteredProducts.map((item: any) => (
                       <TableRow key={item.productId}>
                         <TableCell className="font-medium">{item.productName}</TableCell>
                         <TableCell>
@@ -132,14 +180,16 @@ export function ProductProfitAnalysis() {
               </div>
             ) : (
               <div className="flex h-[300px] items-center justify-center">
-                <p className="text-sm text-muted-foreground">No data available for the selected period</p>
+                <p className="text-sm text-muted-foreground">
+                  {searchQuery ? "No products match your search criteria" : "No data available for the selected period"}
+                </p>
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="variants">
-            {data.variants.length > 0 ? (
-              <div className="rounded-md border">
+            {filteredVariants.length > 0 ? (
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -154,7 +204,7 @@ export function ProductProfitAnalysis() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.variants.map((item: any) => (
+                    {filteredVariants.map((item: any) => (
                       <TableRow key={`${item.productId}-${item.variantName}`}>
                         <TableCell className="font-medium">{item.productName}</TableCell>
                         <TableCell>{item.variantName}</TableCell>
@@ -186,17 +236,19 @@ export function ProductProfitAnalysis() {
               </div>
             ) : (
               <div className="flex h-[300px] items-center justify-center">
-                <p className="text-sm text-muted-foreground">No data available for the selected period</p>
+                <p className="text-sm text-muted-foreground">
+                  {searchQuery ? "No variants match your search criteria" : "No data available for the selected period"}
+                </p>
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="chart">
-            {data.products.length > 0 ? (
+            {filteredProducts.length > 0 ? (
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={data.products.slice(0, 10)}
+                    data={filteredProducts.slice(0, 10)}
                     margin={{
                       top: 20,
                       right: 30,
@@ -205,7 +257,14 @@ export function ProductProfitAnalysis() {
                     }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="productName" angle={-45} textAnchor="end" height={70} tick={{ fontSize: 12 }} />
+                    <XAxis
+                      dataKey="productName"
+                      angle={-45}
+                      textAnchor="end"
+                      height={70}
+                      tick={{ fontSize: 12 }}
+                      interval={0}
+                    />
                     <YAxis yAxisId="left" tickFormatter={(value) => `$${value}`} tick={{ fontSize: 12 }} />
                     <YAxis
                       yAxisId="right"
@@ -225,7 +284,7 @@ export function ProductProfitAnalysis() {
                     <Bar yAxisId="left" dataKey="revenue" name="Revenue" fill="#3b82f6" />
                     <Bar yAxisId="left" dataKey="profit" name="Profit" fill="#10b981" />
                     <Bar yAxisId="right" dataKey="margin" name="Profit Margin" fill="#f59e0b">
-                      {data.products.slice(0, 10).map((entry: any, index: number) => (
+                      {filteredProducts.slice(0, 10).map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={getProfitMarginColor(entry.margin)} />
                       ))}
                     </Bar>
@@ -234,7 +293,9 @@ export function ProductProfitAnalysis() {
               </div>
             ) : (
               <div className="flex h-[400px] items-center justify-center">
-                <p className="text-sm text-muted-foreground">No data available for the selected period</p>
+                <p className="text-sm text-muted-foreground">
+                  {searchQuery ? "No products match your search criteria" : "No data available for the selected period"}
+                </p>
               </div>
             )}
           </TabsContent>

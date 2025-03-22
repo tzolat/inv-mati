@@ -168,13 +168,13 @@ export function InventoryOverview() {
         <CardDescription>Distribution of your inventory</CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="products" onValueChange={setView}>
+        <Tabs defaultValue="variants" onValueChange={setView}>
           <TabsList className="mb-4">
-            <TabsTrigger value="products">By Products</TabsTrigger>
+            {/* <TabsTrigger value="products">By Products</TabsTrigger> */}
             <TabsTrigger value="variants">By Product Variants</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="products" className="h-[800px]">
+          {/* <TabsContent value="products" className="h-[800px]">
             {productChartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -224,7 +224,7 @@ export function InventoryOverview() {
                 <p className="text-sm text-muted-foreground">No products with stock available</p>
               </div>
             )}
-          </TabsContent>
+          </TabsContent> */}
 
           <TabsContent value="variants" className="h-[350px]">
             <div className="mb-4">

@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from "recharts"
 import axios from "axios"
+import { format } from "date-fns"
 
 export function ProfitChart() {
   const searchParams = useSearchParams()
@@ -57,6 +58,13 @@ export function ProfitChart() {
 
     try {
       switch (interval) {
+        case "hour":
+          // For hourly data, show the hour
+          if (value.includes("T")) {
+            const date = new Date(value)
+            return format(date, "h:mm a")
+          }
+          return value
         case "day":
           return value.split("-").slice(1).join("-") // Show MM-DD
         case "week":
@@ -109,11 +117,18 @@ export function ProfitChart() {
                 top: 5,
                 right: 30,
                 left: 20,
-                bottom: 5,
+                bottom: 60,
               }}
             >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tickFormatter={formatXAxis} tick={{ fontSize: 12 }} />
+              <XAxis
+                dataKey="date"
+                tickFormatter={formatXAxis}
+                tick={{ fontSize: 12 }}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+              />
               <YAxis yAxisId="left" tickFormatter={(value) => `$${value}`} tick={{ fontSize: 12 }} />
               <YAxis
                 yAxisId="right"
@@ -127,7 +142,13 @@ export function ProfitChart() {
                   if (name === "profitMargin") return [`${value}%`, "Profit Margin"]
                   return [`$${value.toFixed(2)}`, "Profit"]
                 }}
-                labelFormatter={(label) => `Date: ${label}`}
+                labelFormatter={(label) => {
+                  if (interval === "hour" && label.includes("T")) {
+                    const date = new Date(label)
+                    return `Time: ${format(date, "MMM dd, yyyy h:mm a")}`
+                  }
+                  return `Date: ${label}`
+                }}
               />
               <Legend />
               <Bar yAxisId="left" dataKey="profit" name="Profit" fill="#10b981" />

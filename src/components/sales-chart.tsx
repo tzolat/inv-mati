@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts"
 import axios from "axios"
+import { format } from "date-fns"
 
 export function SalesChart() {
   const searchParams = useSearchParams()
@@ -55,6 +56,13 @@ export function SalesChart() {
 
     try {
       switch (interval) {
+        case "hour":
+          // For hourly data, show the hour
+          if (value.includes("T")) {
+            const date = new Date(value)
+            return format(date, "h:mm a")
+          }
+          return value
         case "day":
           return value.split("-").slice(1).join("-") // Show MM-DD
         case "week":
@@ -104,7 +112,14 @@ export function SalesChart() {
               }}
             >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tickFormatter={formatXAxis} tick={{ fontSize: 12 }} />
+              <XAxis
+                dataKey="date"
+                tickFormatter={formatXAxis}
+                tick={{ fontSize: 12 }}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+              />
               <YAxis yAxisId="left" tickFormatter={(value) => `$${value}`} tick={{ fontSize: 12 }} />
               <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => value} tick={{ fontSize: 12 }} />
               <Tooltip
@@ -112,7 +127,13 @@ export function SalesChart() {
                   if (name === "count") return [value, "Sales Count"]
                   return [`$${value.toFixed(2)}`, name === "revenue" ? "Revenue" : "Profit"]
                 }}
-                labelFormatter={(label) => `Date: ${label}`}
+                labelFormatter={(label) => {
+                  if (interval === "hour" && label.includes("T")) {
+                    const date = new Date(label)
+                    return `Time: ${format(date, "MMM dd, yyyy h:mm a")}`
+                  }
+                  return `Date: ${label}`
+                }}
               />
               <Legend />
               <Line
