@@ -32,8 +32,8 @@ export default function SignInPage() {
                 },
               }}
               path="/sign-in"
-              signUpUrl={null}
-              redirectUrl="/"
+              signUpUrl="/sign-up" // Updated to provide a valid sign-up URL
+              redirectUrl="/(protected)/" // Ensure this points to a valid route
             />
           </CardContent>
         </Card>
