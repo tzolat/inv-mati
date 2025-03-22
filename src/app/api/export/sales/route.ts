@@ -37,11 +37,12 @@ export async function GET(req: NextRequest) {
     }
 
     // Add payment status filter - only if a specific status is selected
-    if (paymentStatus) {
+    if (paymentStatus && paymentStatus !== "all") {
       query.paymentStatus = paymentStatus
     }
 
-    console.log("Query:", JSON.stringify(query, null, 2))
+    // Log the query for debugging
+    console.log("Sales API Query:", JSON.stringify(query, null, 2))
 
     // Execute query
     const totalSales = await Sale.countDocuments(query)

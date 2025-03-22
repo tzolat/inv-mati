@@ -15,9 +15,9 @@ import { Trash, Plus, Loader2, Search, ShoppingCart } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import axios from "axios"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./ui/command"
 
 // Define schema for form validation
 const saleItemSchema = z.object({
@@ -59,7 +59,7 @@ export function AddSaleForm() {
         {
           product: "",
           variant: "",
-          quantity: 1,
+          quantity: 0,
         },
       ],
       paymentMethod: "Cash",
@@ -124,50 +124,63 @@ export function AddSaleForm() {
   }, [searchQuery, products])
 
   // Calculate receipt totals whenever form values change
-  const calculateReceiptItems = useCallback(
-    (values: SaleFormValues) => {
-      const items = values.items || []
+  const calculateReceiptItems = useCallback(() => {
+    const values = form.getValues()
+    const items = values.items || []
 
-      const calculatedItems = items
-        .map((item, index) => {
-          const product = selectedProducts[index]
-          const variant = selectedVariants[index]
+    const calculatedItems = items
+      .map((item, index) => {
+        const product = selectedProducts[index]
+        const variant = selectedVariants[index]
 
-          if (!product || !variant) return null
+        if (!product || !variant) return null
 
-          const quantity = item.quantity || 0
-          const actualPrice = item.actualSellingPrice || variant.sellingPrice
-          const totalPrice = actualPrice * quantity
-          const profit = (actualPrice - variant.costPrice) * quantity
+        const quantity = item.quantity || 0
+        const actualPrice = item.actualSellingPrice || variant.sellingPrice
+        const totalPrice = actualPrice * quantity
+        const profit = (actualPrice - variant.costPrice) * quantity
 
-          return {
-            name: `${product.name} - ${variant.name}`,
-            quantity,
-            unitPrice: actualPrice,
-            totalPrice,
-            profit,
-          }
-        })
-        .filter(Boolean)
+        return {
+          name: `${product.name} - ${variant.name}`,
+          quantity,
+          unitPrice: actualPrice,
+          totalPrice,
+          profit,
+        }
+      })
+      .filter(Boolean)
 
-      setReceiptItems(calculatedItems)
+    setReceiptItems(calculatedItems)
 
-      const calculatedSubtotal = calculatedItems.reduce((sum, item) => sum + (item?.totalPrice || 0), 0)
-      const calculatedProfit = calculatedItems.reduce((sum, item) => sum + (item?.profit || 0), 0)
+    const calculatedSubtotal = calculatedItems.reduce((sum, item) => sum + (item?.totalPrice || 0), 0)
+    const calculatedProfit = calculatedItems.reduce((sum, item) => sum + (item?.profit || 0), 0)
 
-      setSubtotal(calculatedSubtotal)
-      setTotalProfit(calculatedProfit)
-    },
-    [selectedProducts, selectedVariants]
-  )
+    setSubtotal(calculatedSubtotal)
+    setTotalProfit(calculatedProfit)
+  }, [form, selectedProducts, selectedVariants])
 
-  // Update receipt when form values change
+  // Debounce utility
+  function debounce(func: Function, wait: number) {
+    let timeout: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  }
+
+  // Debounced version of calculateReceiptItems
+  const debouncedCalculateReceiptItems = useCallback(
+    debounce(() => calculateReceiptItems(), 300),
+    [calculateReceiptItems]
+  );
+
+  // Update receipt when specific form fields change
   useEffect(() => {
-    const subscription = form.watch((values:any) => {
-      calculateReceiptItems(values); // Pass the watched values directly
+    const subscription = form.watch((values) => {
+      debouncedCalculateReceiptItems();
     });
-    return () => subscription.unsubscribe(); // Clean up subscription
-  }, [calculateReceiptItems])
+    return () => subscription.unsubscribe();
+  }, [form, debouncedCalculateReceiptItems]);
 
   // Handle product selection
   const handleProductChange = (value: string, index: number) => {
@@ -247,7 +260,14 @@ export function AddSaleForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Payment Method</FormLabel>
-                      <Select defaultValue={field.value} onValueChange={field.onChange}>
+                      <Select
+                        defaultValue={field.value}
+                        onValueChange={(value) => {
+                          if (field.value !== value) {
+                            field.onChange(value); // Only update if the value has changed
+                          }
+                        }}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select payment method" />
@@ -255,10 +275,11 @@ export function AddSaleForm() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="Cash">Cash</SelectItem>
-                          <SelectItem value="Credit Card">Credit Card</SelectItem>
-                          <SelectItem value="Debit Card">Debit Card</SelectItem>
-                          <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
-                          <SelectItem value="Mobile Payment">Mobile Payment</SelectItem>
+                          <SelectItem value="CBE">CBE</SelectItem>
+                          <SelectItem value="Abyssinia">Abyssinia</SelectItem>
+                          <SelectItem value="Awash">Awash</SelectItem>
+                          <SelectItem value="Zemen">Zemen</SelectItem>
+                          <SelectItem value="Telebirr">Telebirr</SelectItem>
                           <SelectItem value="Check">Check</SelectItem>
                         </SelectContent>
                       </Select>
@@ -273,7 +294,14 @@ export function AddSaleForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Payment Status</FormLabel>
-                      <Select defaultValue={field.value} onValueChange={field.onChange}>
+                      <Select
+                        defaultValue={field.value}
+                        onValueChange={(value) => {
+                          if (field.value !== value) {
+                            field.onChange(value); // Only update if the value has changed
+                          }
+                        }}
+                      >y
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select payment status" />
@@ -282,9 +310,11 @@ export function AddSaleForm() {
                         <SelectContent>
                           <SelectItem value="Completed">Completed</SelectItem>
                           <SelectItem value="Pending">Pending</SelectItem>
-                          <SelectItem value="Cancelled">Cancelled</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormDescription>
+                        Choose "Completed" for fully paid sales or "Pending" for sales awaiting payment
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -431,7 +461,7 @@ export function AddSaleForm() {
                                   <Input
                                     type="number"
                                     min="1"
-                                    max={selectedVariants[index]?.currentStock || 1}
+                                    max={selectedVariants[index]?.currentStock || 0}
                                     {...field}
                                     onChange={(e) => {
                                       field.onChange(e)

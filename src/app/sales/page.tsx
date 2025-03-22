@@ -1,10 +1,9 @@
 import { Suspense } from "react"
 import { SalesTable } from "@/components/sales-table"
-import { SalesFilters } from "@/components/sales-filters"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import Link from "next/link"
-import { SalesTableSkeleton } from "@/components/skeletons/sales-table-skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function SalesPage() {
   return (
@@ -17,10 +16,9 @@ export default function SalesPage() {
             Record Sale
           </Button>
         </Link>
-      </div> 
-      <Suspense fallback={<SalesTableSkeleton />}>
-      <SalesFilters />
-     
+      </div>
+
+      <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
         <SalesTable />
       </Suspense>
     </div>

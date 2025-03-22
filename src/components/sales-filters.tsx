@@ -1,7 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Calendar } from "@/components/ui/calendar"
@@ -10,47 +8,40 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, X, CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { ExportButton } from "@/components/export-button"
 
-export function SalesFilters() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+interface SalesFiltersProps {
+  onSearchChange: (value: string) => void
+  onStartDateChange: (date: Date | undefined) => void
+  onEndDateChange: (date: Date | undefined) => void
+  onPaymentStatusChange: (status: string) => void
+  searchValue: string
+  startDateValue: Date | undefined
+  endDateValue: Date | undefined
+  paymentStatusValue: string
+  exportParams: Record<string, string>
+}
 
-  const [search, setSearch] = useState(searchParams.get("search") || "")
-  const [startDate, setStartDate] = useState<Date | undefined>(
-    searchParams.get("startDate") ? new Date(searchParams.get("startDate")!) : undefined,
-  )
-  const [endDate, setEndDate] = useState<Date | undefined>(
-    searchParams.get("endDate") ? new Date(searchParams.get("endDate")!) : undefined,
-  )
-  const [paymentStatus, setPaymentStatus] = useState(searchParams.get("paymentStatus") || "")
-
-  // Apply filters automatically when they change
-  useEffect(() => {
-    const params = new URLSearchParams()
-
-    if (search) params.set("search", search)
-    if (startDate) params.set("startDate", startDate.toISOString())
-    if (endDate) params.set("endDate", endDate.toISOString())
-    if (paymentStatus && paymentStatus !== "all") params.set("paymentStatus", paymentStatus)
-
-    // Debounce to avoid too many router pushes
-    const timer = setTimeout(() => {
-      router.push(`/sales?${params.toString()}`)
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [search, startDate, endDate, paymentStatus, router])
-
+export function SalesFilters({
+  onSearchChange,
+  onStartDateChange,
+  onEndDateChange,
+  onPaymentStatusChange,
+  searchValue,
+  startDateValue,
+  endDateValue,
+  paymentStatusValue,
+  exportParams,
+}: SalesFiltersProps) {
   const resetFilters = () => {
-    setSearch("")
-    setStartDate(undefined)
-    setEndDate(undefined)
-    setPaymentStatus("")
-
-    router.push("/sales")
+    onSearchChange("")
+    onStartDateChange(undefined)
+    onEndDateChange(undefined)
+    onPaymentStatusChange("all")
   }
 
-  const hasActiveFilters = search || startDate || endDate || paymentStatus
+  const hasActiveFilters =
+    searchValue || startDateValue || endDateValue || (paymentStatusValue && paymentStatusValue !== "all")
 
   return (
     <div className="space-y-4">
@@ -62,8 +53,8 @@ export function SalesFilters() {
               type="search"
               placeholder="Search by invoice number or customer..."
               className="pl-8"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchValue}
+              onChange={(e) => onSearchChange(e.target.value)}
             />
           </div>
         </div>
@@ -74,15 +65,15 @@ export function SalesFilters() {
                 variant="outline"
                 className={cn(
                   "justify-start text-left font-normal sm:w-[200px]",
-                  !startDate && "text-muted-foreground",
+                  !startDateValue && "text-muted-foreground",
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {startDate ? format(startDate, "MMM dd, yyyy") : "Start Date"}
+                {startDateValue ? format(startDateValue, "MMM dd, yyyy") : "Start Date"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
+              <Calendar mode="single" selected={startDateValue} onSelect={onStartDateChange} initialFocus />
             </PopoverContent>
           </Popover>
 
@@ -90,24 +81,27 @@ export function SalesFilters() {
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className={cn("justify-start text-left font-normal sm:w-[200px]", !endDate && "text-muted-foreground")}
+                className={cn(
+                  "justify-start text-left font-normal sm:w-[200px]",
+                  !endDateValue && "text-muted-foreground",
+                )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {endDate ? format(endDate, "MMM dd, yyyy") : "End Date"}
+                {endDateValue ? format(endDateValue, "MMM dd, yyyy") : "End Date"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
-                selected={endDate}
-                onSelect={setEndDate}
+                selected={endDateValue}
+                onSelect={onEndDateChange}
                 initialFocus
-                disabled={(date) => (startDate ? date < startDate : false)}
+                disabled={(date) => (startDateValue ? date < startDateValue : false)}
               />
             </PopoverContent>
           </Popover>
 
-          <Select value={paymentStatus} onValueChange={setPaymentStatus}>
+          <Select value={paymentStatusValue} onValueChange={onPaymentStatusChange}>
             <SelectTrigger className="sm:w-[200px]">
               <SelectValue placeholder="Payment Status" />
             </SelectTrigger>
@@ -115,7 +109,6 @@ export function SalesFilters() {
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="Completed">Completed</SelectItem>
               <SelectItem value="Pending">Pending</SelectItem>
-              <SelectItem value="Cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -125,12 +118,15 @@ export function SalesFilters() {
         <div className="text-sm text-muted-foreground">
           {hasActiveFilters ? "Filtered results" : "Showing all sales"}
         </div>
-        {hasActiveFilters && (
-          <Button variant="outline" size="sm" onClick={resetFilters}>
-            <X className="mr-2 h-4 w-4" />
-            Clear Filters
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {hasActiveFilters && (
+            <Button variant="outline" size="sm" onClick={resetFilters}>
+              <X className="mr-2 h-4 w-4" />
+              Clear Filters
+            </Button>
+          )}
+          <ExportButton endpoint="/api/export/sales" filename="sales-report" params={exportParams} />
+        </div>
       </div>
     </div>
   )

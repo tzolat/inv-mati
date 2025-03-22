@@ -142,7 +142,7 @@ function SidebarContent({
             <Bell className="h-4 w-4" />
             Notifications
             {unreadCount > 0 && (
-              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-orange-400 text-[10px] font-medium text-primary-foreground">
+              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-orange-300 text-[10px] font-medium text-primary-foreground">
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             )}

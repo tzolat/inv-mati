@@ -18,7 +18,7 @@ import { useRouter, usePathname } from "next/navigation"
 import axios from "axios"
 import { NotificationItem } from "@/components/notification-item"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { ModeToggle } from "./ModeToggle"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 
 import Link from "next/link"
@@ -27,8 +27,8 @@ import { BarChart3, Home, Package, Settings, ShoppingCart } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
+
 
 export default function Header() {
   const router = useRouter()
@@ -36,34 +36,9 @@ export default function Header() {
   const [search, setSearch] = useState("")
   const [notifications, setNotifications] = useState<any[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
-  
-    const [open, setOpen] = useState(false)
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await axios.get("/api/notifications?limit=5")
-        setNotifications(response.data.notifications)
-        setUnreadCount(response.data.unreadCount)
-      } catch (error) {
-        console.error("Error fetching notifications:", error)
-      }
-    }
 
-    fetchNotifications()
-
-    // Set up interval to check for new notifications more frequently
-    const interval = setInterval(fetchNotifications, 15000) // Check every 15 seconds
-
-    // Set up event listener for new notifications
-    window.addEventListener("new-notification", fetchNotifications)
-
-    return () => {
-      clearInterval(interval)
-      window.removeEventListener("new-notification", fetchNotifications)
-    }
-
-    
-  }, [])
+  const [open, setOpen] = useState(false)
+ 
 
   useEffect(() => {
     const fetchUnreadCount = async () => {
@@ -86,6 +61,31 @@ export default function Header() {
     return () => {
       clearInterval(interval)
       window.removeEventListener("new-notification", fetchUnreadCount)
+    }
+  }, [])
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const response = await axios.get("/api/notifications?limit=5")
+        setNotifications(response.data.notifications)
+        setUnreadCount(response.data.unreadCount)
+      } catch (error) {
+        console.error("Error fetching notifications:", error)
+      }
+    }
+
+    fetchNotifications()
+
+    // Set up interval to check for new notifications more frequently
+    const interval = setInterval(fetchNotifications, 15000) // Check every 15 seconds
+
+    // Set up event listener for new notifications
+    window.addEventListener("new-notification", fetchNotifications)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener("new-notification", fetchNotifications)
     }
   }, [])
 
@@ -140,12 +140,13 @@ export default function Header() {
         </div>
       </form>
       <div className="ml-auto flex items-center gap-2">
+        <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" className="relative">
               <Bell className="h-4 w-4" />
               {unreadCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-400 text-[10px] font-medium text-primary-foreground">
+                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-300 text-[10px] font-medium text-primary-foreground">
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
@@ -180,11 +181,9 @@ export default function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <ModeToggle/>
     </header>
   )
 }
-
 
 function SidebarContent({
   className,
@@ -267,7 +266,7 @@ function SidebarContent({
             <Bell className="h-4 w-4" />
             Notifications
             {unreadCount > 0 && (
-              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-orange-400 text-[10px] font-medium text-primary-foreground">
+              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-orange-300 text-[10px] font-medium text-primary-foreground">
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             )}
