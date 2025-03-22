@@ -117,12 +117,7 @@ export function ReportsFilters() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm" onClick={() => applyPreset("today")}>
-          Today
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => applyPreset("yesterday")}>
-          Yesterday
-        </Button>
+       
         <Button variant="outline" size="sm" onClick={() => applyPreset("last7days")}>
           Last 7 Days
         </Button>
@@ -193,7 +188,7 @@ export function ReportsFilters() {
             <SelectValue placeholder="Select interval" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="hour">Hourly</SelectItem>
+            
             <SelectItem value="day">Daily</SelectItem>
             <SelectItem value="week">Weekly</SelectItem>
             <SelectItem value="month">Monthly</SelectItem>
