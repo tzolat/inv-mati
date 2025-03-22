@@ -174,7 +174,7 @@ export function InventoryOverview() {
             <TabsTrigger value="variants">By Product Variants</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="products" className="h-[300px]">
+          <TabsContent value="products" className="h-[1200px]">
             {productChartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart

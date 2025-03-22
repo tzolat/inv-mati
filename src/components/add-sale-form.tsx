@@ -301,7 +301,7 @@ export function AddSaleForm() {
                             field.onChange(value); // Only update if the value has changed
                           }
                         }}
-                      >y
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select payment status" />
@@ -312,9 +312,7 @@ export function AddSaleForm() {
                           <SelectItem value="Pending">Pending</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormDescription>
-                        Choose "Completed" for fully paid sales or "Pending" for sales awaiting payment
-                      </FormDescription>
+                      
                       <FormMessage />
                     </FormItem>
                   )}
