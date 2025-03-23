@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useFieldArray, useForm } from "react-hook-form"
@@ -14,6 +14,29 @@ import { Trash, Plus } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import axios from "axios"
+
+// Add a function to generate SKUs automatically
+// Add this function after the imports and before the AddProductForm component
+
+function generateSKU(productName: string, variantName: string, index: number): string {
+  // Extract first 3 letters of product name (or fewer if shorter)
+  const productPrefix = productName
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .substring(0, 3)
+    .toUpperCase()
+
+  // Extract first 3 letters of variant name (or fewer if shorter)
+  const variantPrefix = variantName
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .substring(0, 3)
+    .toUpperCase()
+
+  // Current timestamp for uniqueness
+  const timestamp = Date.now().toString().slice(-6)
+
+  // Combine to create SKU
+  return `${productPrefix}-${variantPrefix}-${timestamp}`
+}
 
 // Define schema for form validation
 const variantSchema = z.object({
@@ -53,7 +76,7 @@ export function AddProductForm() {
       variants: [
         {
           name: "Default",
-          sku: "",
+          sku: generateSKU("PROD", "Default", 1),
           costPrice: 0,
           sellingPrice: 0,
           currentStock: 0,
@@ -69,6 +92,32 @@ export function AddProductForm() {
     control: form.control,
     name: "variants",
   })
+
+  // Update SKU when product name or variant name changes
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      // If product name changes, update all variant SKUs
+      if (name === "name" && value.name) {
+        const productName = value.name
+        fields.forEach((field, index) => {
+          const variantName = form.getValues(`variants.${index}.name`) || "VAR"
+          if (variantName) {
+            form.setValue(`variants.${index}.sku`, generateSKU(productName, variantName, index + 1))
+          }
+        })
+      }
+
+      // If a variant name changes, update just that variant's SKU
+      if (name && name.startsWith("variants.") && name.endsWith(".name")) {
+        const index = Number.parseInt(name.split(".")[1])
+        const productName = form.getValues("name") || "PROD"
+        const variantName = form.getValues(`variants.${index}.name`) || "VAR"
+        form.setValue(`variants.${index}.sku`, generateSKU(productName, variantName, index + 1))
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [form, fields])
 
   const onSubmit = async (data: ProductFormValues) => {
     try {
@@ -297,17 +346,18 @@ export function AddProductForm() {
             type="button"
             variant="outline"
             size="sm"
-            onClick={() =>
+            onClick={() => {
+              const productName = form.getValues("name") || "PROD"
               append({
                 name: "",
-                sku: "",
+                sku: generateSKU(productName, "VAR", fields.length + 1),
                 costPrice: 0,
                 sellingPrice: 0,
                 currentStock: 0,
                 lowStockThreshold: 5,
                 location: "",
               })
-            }
+            }}
           >
             <Plus className="mr-2 h-4 w-4" />
             Add Variant
