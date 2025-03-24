@@ -5,6 +5,7 @@ import { BarChart3, DollarSign, Package, ShoppingCart } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import axios from "axios"
+import { formatNumber } from "@/utils/formatNumber";
 
 export function DashboardCards() {
   const [data, setData] = useState<any>(null)
@@ -56,7 +57,7 @@ export function DashboardCards() {
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${data?.totalRevenue?.toFixed(2) || "0.00"}</div>
+          <div className="text-2xl font-bold">${formatNumber(data?.totalRevenue || 0)}</div>
           <p className="text-xs text-muted-foreground">From {data?.totalSales || 0} sales this period</p>
         </CardContent>
       </Card>
@@ -66,7 +67,7 @@ export function DashboardCards() {
           <BarChart3 className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${data?.totalProfit?.toFixed(2) || "0.00"}</div>
+          <div className="text-2xl font-bold">${formatNumber(data?.totalProfit || 0)}</div>
           <p className="text-xs text-muted-foreground">
             {data?.averageProfitMargin?.toFixed(1) || "0.0"}% profit margin
           </p>
@@ -78,7 +79,7 @@ export function DashboardCards() {
           <Package className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{data?.totalProducts || 0}</div>
+          <div className="text-2xl font-bold">{formatNumber(data?.totalProducts || 0)}</div>
           <p className="text-xs text-muted-foreground">{data?.lowStockItems || 0} items low in stock</p>
         </CardContent>
       </Card>
@@ -88,7 +89,7 @@ export function DashboardCards() {
           <ShoppingCart className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{data?.totalSales || 0}</div>
+          <div className="text-2xl font-bold">{formatNumber(data?.totalSales || 0)}</div>
           <p className="text-xs text-muted-foreground">For this period</p>
         </CardContent>
       </Card>

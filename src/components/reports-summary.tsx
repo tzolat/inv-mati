@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BarChart3, DollarSign, ShoppingCart, TrendingUp } from "lucide-react"
 import axios from "axios"
+import { formatNumber } from "@/utils/formatNumber"
 
 export function ReportsSummary() {
   const searchParams = useSearchParams()
@@ -69,7 +70,7 @@ export function ReportsSummary() {
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${data?.totalRevenue?.toFixed(2) || "0.00"}</div>
+          <div className="text-2xl font-bold">${formatNumber(data?.totalRevenue || 0)}</div>
           <p className="text-xs text-muted-foreground">For the selected period</p>
         </CardContent>
       </Card>
@@ -79,7 +80,7 @@ export function ReportsSummary() {
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${data?.totalProfit?.toFixed(2) || "0.00"}</div>
+          <div className="text-2xl font-bold">${formatNumber(data?.totalProfit || 0)}</div>
           <p className="text-xs text-muted-foreground">
             {data?.averageProfitMargin?.toFixed(1) || "0.0"}% profit margin
           </p>
@@ -91,7 +92,7 @@ export function ReportsSummary() {
           <ShoppingCart className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{data?.totalSales || 0}</div>
+          <div className="text-2xl font-bold">{formatNumber(data?.totalSales || 0)}</div>
           <p className="text-xs text-muted-foreground">Number of transactions</p>
         </CardContent>
       </Card>
@@ -101,7 +102,7 @@ export function ReportsSummary() {
           <BarChart3 className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{data?.lowStockItems || 0}</div>
+          <div className="text-2xl font-bold">{formatNumber(data?.lowStockItems || 0)}</div>
           <p className="text-xs text-muted-foreground">Items below threshold</p>
         </CardContent>
       </Card>

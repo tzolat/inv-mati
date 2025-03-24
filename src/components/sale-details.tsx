@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import axios from "axios"
 import { Badge } from "@/components/ui/badge"
+import { formatNumber } from "@/utils/formatNumber"
 
 interface SaleDetailsProps {
   id: string
@@ -150,15 +151,15 @@ export function SaleDetails({ id }: SaleDetailsProps) {
             </div>
             <div className="flex justify-between">
               <span className="text-sm font-medium">Total Amount:</span>
-              <span className="font-medium">${sale.totalAmount.toFixed(2)}</span>
+              <span className="font-medium">${formatNumber(sale.totalAmount)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm font-medium">Total Profit:</span>
-              <span className="text-green-600 font-medium">${sale.totalProfit.toFixed(2)}</span>
+              <span className="text-green-600 font-medium">${formatNumber(sale.totalProfit)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm font-medium">Profit Margin:</span>
-              <span className="font-medium">{((sale.totalProfit / sale.totalAmount) * 100).toFixed(1)}%</span>
+              <span className="font-medium">{formatNumber((sale.totalProfit / sale.totalAmount) * 100)}%</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm font-medium">Payment Status:</span>
@@ -222,10 +223,10 @@ export function SaleDetails({ id }: SaleDetailsProps) {
                   <tr key={item._id} className="border-b">
                     <td className="p-2">{item.product?.name || "Unknown Product"}</td>
                     <td className="p-2">{item.variant}</td>
-                    <td className="p-2">{item.quantity}</td>
-                    <td className="p-2">${item.actualSellingPrice.toFixed(2)}</td>
-                    <td className="p-2">${(item.actualSellingPrice * item.quantity).toFixed(2)}</td>
-                    <td className="p-2 text-green-600">${item.profit.toFixed(2)}</td>
+                    <td className="p-2">{formatNumber(item.quantity)}</td>
+                    <td className="p-2">${formatNumber(item.actualSellingPrice)}</td>
+                    <td className="p-2">${formatNumber(item.actualSellingPrice * item.quantity)}</td>
+                    <td className="p-2 text-green-600">${formatNumber(item.profit)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -234,8 +235,8 @@ export function SaleDetails({ id }: SaleDetailsProps) {
                   <td colSpan={4} className="p-2 text-right">
                     Total:
                   </td>
-                  <td className="p-2">${sale.totalAmount.toFixed(2)}</td>
-                  <td className="p-2 text-green-600">${sale.totalProfit.toFixed(2)}</td>
+                  <td className="p-2">${formatNumber(sale.totalAmount)}</td>
+                  <td className="p-2 text-green-600">${formatNumber(sale.totalProfit)}</td>
                 </tr>
               </tfoot>
             </table>

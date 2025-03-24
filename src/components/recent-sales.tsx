@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { formatDistanceToNow } from "date-fns"
 import { useRouter } from "next/navigation"
 import axios from "axios"
+import { formatNumber } from "@/utils/formatNumber";
 
 export function RecentSales() {
   const router = useRouter()
@@ -88,8 +89,8 @@ export function RecentSales() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium">${sale.totalAmount.toFixed(2)}</p>
-                  <p className="text-xs text-green-500">+${sale.totalProfit.toFixed(2)} profit</p>
+                  <p className="text-sm font-medium">${formatNumber(sale.totalAmount)}</p>
+                  <p className="text-xs text-green-500">+${formatNumber(sale.totalProfit)} profit</p>
                 </div>
               </div>
             ))}

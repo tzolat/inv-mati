@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LabelList } from "recharts"
 import axios from "axios"
+import { formatNumber } from "@/utils/formatNumber"
 
 export function TopProducts() {
   const searchParams = useSearchParams()
@@ -158,9 +159,9 @@ export function TopProducts() {
                           <Badge variant="outline">{item.category}</Badge>
                         </td>
                         <td className="p-2">{item.brand}</td>
-                        <td className="p-2">{item.quantity}</td>
-                        <td className="p-2">${item.revenue.toFixed(2)}</td>
-                        <td className="p-2 text-green-600">${item.profit.toFixed(2)}</td>
+                        <td className="p-2">{formatNumber(item.quantity)}</td>
+                        <td className="p-2">${formatNumber(item.revenue)}</td>
+                        <td className="p-2 text-green-600">${formatNumber(item.profit)}</td>
                       </tr>
                     ))}
                   </tbody>

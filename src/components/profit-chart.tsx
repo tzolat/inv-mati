@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from "recharts"
 import axios from "axios"
 import { format } from "date-fns"
+import { formatNumber } from "@/utils/formatNumber"
 
 export function ProfitChart() {
   const searchParams = useSearchParams()
@@ -139,8 +140,8 @@ export function ProfitChart() {
               />
               <Tooltip
                 formatter={(value: number, name) => {
-                  if (name === "profitMargin") return [`${value}%`, "Profit Margin"]
-                  return [`$${value.toFixed(2)}`, "Profit"]
+                  if (name === "profitMargin") return [`${formatNumber(value)}%`, "Profit Margin"]
+                  return [`$${formatNumber(value)}`, "Profit"]
                 }}
                 labelFormatter={(label) => {
                   if (interval === "hour" && label.includes("T")) {

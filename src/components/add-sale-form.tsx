@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import axios from "axios"
+import { formatNumber } from "@/utils/formatNumber"
 
 // Define schema for form validation
 const saleItemSchema = z.object({
@@ -606,15 +607,15 @@ export function AddSaleForm() {
                         <div key={i} className="flex justify-between text-sm">
                           <span className="flex-1 truncate">{item.name}</span>
                           <div className="flex">
-                            <span className="w-16 text-right">{item.quantity}</span>
-                            <span className="w-20 text-right">${Number(item.unitPrice).toFixed(2)}</span>
-                            <span className="w-24 text-right">${item.totalPrice.toFixed(2)}</span>
+                            <span className="w-16 text-right">{formatNumber(item.quantity)}</span>
+                            <span className="w-20 text-right">${formatNumber(Number(item.unitPrice))}</span>
+                            <span className="w-24 text-right">${formatNumber(item.totalPrice)}</span>
                             <span
                               className={`w-24 text-right ${
                                 item.profit < 0 ? "text-red-600" : "text-green-600"
                               }`}
                             >
-                              ${item.profit.toFixed(2)}
+                              ${formatNumber(item.profit)}
                             </span>
                           </div>
                         </div>
@@ -631,19 +632,19 @@ export function AddSaleForm() {
                       <div className="space-y-1 pt-2">
                         <div className="flex justify-between text-sm">
                           <span>Subtotal:</span>
-                          <span>${subtotal.toFixed(2)}</span>
+                          <span>${formatNumber(subtotal)}</span>
                         </div>
                         <div className="flex justify-between text-sm font-medium">
                           <span>Total:</span>
-                          <span>${subtotal.toFixed(2)}</span>
+                          <span>${formatNumber(subtotal)}</span>
                         </div>
                         <div className="flex justify-between text-sm text-green-600">
                           <span>Profit:</span>
-                          <span>${totalProfit.toFixed(2)}</span>
+                          <span>${formatNumber(totalProfit)}</span>
                         </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>Profit Margin:</span>
-                          <span>{subtotal > 0 ? ((totalProfit / subtotal) * 100).toFixed(1) : 0}%</span>
+                          <span>{subtotal > 0 ? formatNumber((totalProfit / subtotal) * 100) : 0}%</span>
                         </div>
                       </div>
                     </>

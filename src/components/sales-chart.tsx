@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts"
 import axios from "axios"
 import { format } from "date-fns"
+import { formatNumber } from "@/utils/formatNumber"
 
 export function SalesChart() {
   const searchParams = useSearchParams()
@@ -120,12 +121,12 @@ export function SalesChart() {
                 textAnchor="end"
                 height={60}
               />
-              <YAxis yAxisId="left" tickFormatter={(value) => `$${value}`} tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => value} tick={{ fontSize: 12 }} />
+              <YAxis yAxisId="left" tickFormatter={(value) => `$${formatNumber(value)}`} tick={{ fontSize: 12 }} />
+              <YAxis yAxisId="right" orientation="right" tickFormatter={(value) => formatNumber(value)} tick={{ fontSize: 12 }} />
               <Tooltip
                 formatter={(value: number, name) => {
-                  if (name === "count") return [value, "Sales Count"]
-                  return [`$${value.toFixed(2)}`, name === "revenue" ? "Revenue" : "Profit"]
+                  if (name === "count") return [formatNumber(value), "Sales Count"]
+                  return [`$${formatNumber(value)}`, name === "revenue" ? "Revenue" : "Profit"]
                 }}
                 labelFormatter={(label) => {
                   if (interval === "hour" && label.includes("T")) {

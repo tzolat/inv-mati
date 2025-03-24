@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from "recharts"
 import axios from "axios"
+import { formatNumber } from "@/utils/formatNumber"
 
 export function ProductProfitAnalysis() {
   const searchParams = useSearchParams()
@@ -153,24 +154,22 @@ export function ProductProfitAnalysis() {
                           <Badge variant="outline">{item.category}</Badge>
                         </TableCell>
                         <TableCell>{item.brand}</TableCell>
-                        <TableCell className="text-right">{item.quantitySold}</TableCell>
-                        <TableCell className="text-right">${item.revenue.toFixed(2)}</TableCell>
-                        <TableCell className="text-right">${item.cost.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-green-600">${item.profit.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">{formatNumber(item.quantitySold)}</TableCell>
+                        <TableCell className="text-right">${formatNumber(item.revenue)}</TableCell>
+                        <TableCell className="text-right">${formatNumber(item.cost)}</TableCell>
+                        <TableCell className="text-right text-green-600">${formatNumber(item.profit)}</TableCell>
                         <TableCell className="text-right">
                           <Badge
                             variant="outline"
-                            className={`
-                              ${
-                                item.margin >= 30
-                                  ? "bg-green-100 text-green-800"
-                                  : item.margin >= 15
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-red-100 text-red-800"
-                              }
-                            `}
+                            className={`${
+                              item.margin >= 30
+                                ? "bg-green-100 text-green-800"
+                                : item.margin >= 15
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
                           >
-                            {item.margin.toFixed(1)}%
+                            {formatNumber(item.margin)}%
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -209,24 +208,22 @@ export function ProductProfitAnalysis() {
                         <TableCell className="font-medium">{item.productName}</TableCell>
                         <TableCell>{item.variantName}</TableCell>
                         <TableCell>{item.sku}</TableCell>
-                        <TableCell className="text-right">{item.quantitySold}</TableCell>
-                        <TableCell className="text-right">${item.revenue.toFixed(2)}</TableCell>
-                        <TableCell className="text-right">${item.cost.toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-green-600">${item.profit.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">{formatNumber(item.quantitySold)}</TableCell>
+                        <TableCell className="text-right">${formatNumber(item.revenue)}</TableCell>
+                        <TableCell className="text-right">${formatNumber(item.cost)}</TableCell>
+                        <TableCell className="text-right text-green-600">${formatNumber(item.profit)}</TableCell>
                         <TableCell className="text-right">
                           <Badge
                             variant="outline"
-                            className={`
-                              ${
-                                item.margin >= 30
-                                  ? "bg-green-100 text-green-800"
-                                  : item.margin >= 15
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-red-100 text-red-800"
-                              }
-                            `}
+                            className={`${
+                              item.margin >= 30
+                                ? "bg-green-100 text-green-800"
+                                : item.margin >= 15
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
                           >
-                            {item.margin.toFixed(1)}%
+                            {formatNumber(item.margin)}%
                           </Badge>
                         </TableCell>
                       </TableRow>

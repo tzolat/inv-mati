@@ -30,6 +30,7 @@ import axios from "axios"
 // Add imports for batch operations
 import { Checkbox } from "@/components/ui/checkbox"
 import { BatchOperations } from "@/components/batch-operations"
+import { formatNumber } from "@/utils/formatNumber";
 
 export function InventoryTable() {
   const router = useRouter()
@@ -285,7 +286,7 @@ export function InventoryTable() {
                     <TableCell>{product.category}</TableCell>
                     <TableCell>{product.brand}</TableCell>
                     <TableCell>{product.variants.length}</TableCell>
-                    <TableCell>{totalStock}</TableCell>
+                    <TableCell>{formatNumber(totalStock)}</TableCell>
                     <TableCell>
                       {hasOutOfStock ? (
                         <Badge variant="destructive">Out of Stock</Badge>
@@ -357,10 +358,10 @@ export function InventoryTable() {
                                   <TableRow key={`${product._id}-${variant.name}`}>
                                     <TableCell>{variant.name}</TableCell>
                                     <TableCell>{variant.sku}</TableCell>
-                                    <TableCell>${variant.costPrice.toFixed(2)}</TableCell>
-                                    <TableCell>${variant.sellingPrice.toFixed(2)}</TableCell>
-                                    <TableCell>{variant.currentStock}</TableCell>
-                                    <TableCell>{variant.lowStockThreshold}</TableCell>
+                                    <TableCell>${formatNumber(variant.costPrice)}</TableCell>
+                                    <TableCell>${formatNumber(variant.sellingPrice)}</TableCell>
+                                    <TableCell>{formatNumber(variant.currentStock)}</TableCell>
+                                    <TableCell>{formatNumber(variant.lowStockThreshold)}</TableCell>
                                     <TableCell>{variant.location || "-"}</TableCell>
                                     <TableCell>
                                       {variant.currentStock === 0 ? (

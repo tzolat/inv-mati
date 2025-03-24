@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 import axios from "axios"
+import { formatNumber } from "@/utils/formatNumber"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle, Eye, MoreHorizontal, Trash } from "lucide-react"
@@ -153,7 +154,7 @@ export function SalesTable() {
                   <TableCell className="font-medium">{sale.invoiceNumber}</TableCell>
                   <TableCell>{sale.customer || "Walk-in Customer"}</TableCell>
                   <TableCell>{sale.createdAt ? format(new Date(sale.createdAt), "MMM dd, yyyy") : "N/A"}</TableCell>
-                  <TableCell>${sale.totalAmount.toFixed(2)}</TableCell>
+                  <TableCell>${formatNumber(sale.totalAmount)}</TableCell>
                   <TableCell>
                     <Badge
                       variant={sale.paymentStatus === "Completed" ? "outline" : "secondary"}

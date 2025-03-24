@@ -14,6 +14,7 @@ import { Trash, Plus } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import axios from "axios"
+import { formatNumber } from "@/utils/formatNumber"
 
 // Add a function to generate SKUs automatically
 // Add this function after the imports and before the AddProductForm component
@@ -268,7 +269,7 @@ export function AddProductForm() {
                       <FormItem>
                         <FormLabel>Cost Price</FormLabel>
                         <FormControl>
-                          <Input type="number" min="0" step="0.01" {...field} />
+                          <Input type="number" value={formatNumber(field.value)} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -282,7 +283,7 @@ export function AddProductForm() {
                       <FormItem>
                         <FormLabel>Selling Price</FormLabel>
                         <FormControl>
-                          <Input type="number" min="0" step="0.01" {...field} />
+                          <Input type="number" value={formatNumber(field.value)} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -296,7 +297,7 @@ export function AddProductForm() {
                       <FormItem>
                         <FormLabel>Current Stock</FormLabel>
                         <FormControl>
-                          <Input type="number" min="0" {...field} />
+                          <Input type="number" value={formatNumber(field.value)} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -310,7 +311,7 @@ export function AddProductForm() {
                       <FormItem>
                         <FormLabel>Low Stock Threshold</FormLabel>
                         <FormControl>
-                          <Input type="number" min="1" {...field} />
+                          <Input type="number" value={formatNumber(field.value)} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
