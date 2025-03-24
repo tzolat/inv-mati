@@ -5,7 +5,7 @@ import Image from "next/image"
 export default function SignInPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted/40">
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+      <div className="mx-auto flex w-full flex-col items-center justify-center space-y-6 sm:w-[350px]">
         <div className="flex flex-col space-y-2 text-center">
         
           <h1 className="text-2xl font-semibold tracking-tight">AutoParts IMS</h1>
@@ -29,6 +29,7 @@ export default function SignInPage() {
                   dividerRow: "hidden",
                   dividerText: "hidden",
                   formFieldInput: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm",
+                  
                 },
               }}
               path="/sign-in"

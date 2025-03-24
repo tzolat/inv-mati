@@ -607,8 +607,15 @@ export function AddSaleForm() {
                           <span className="flex-1 truncate">{item.name}</span>
                           <div className="flex">
                             <span className="w-16 text-right">{item.quantity}</span>
-                            <span className="w-20 text-right">${item.unitPrice.toFixed(2)}</span>
+                            <span className="w-20 text-right">${Number(item.unitPrice).toFixed(2)}</span>
                             <span className="w-24 text-right">${item.totalPrice.toFixed(2)}</span>
+                            <span
+                              className={`w-24 text-right ${
+                                item.profit < 0 ? "text-red-600" : "text-green-600"
+                              }`}
+                            >
+                              ${item.profit.toFixed(2)}
+                            </span>
                           </div>
                         </div>
                       ))}

@@ -95,14 +95,14 @@ export function ExportButton({ endpoint, filename, params = {} }: ExportButtonPr
           )}
           Export as Excel
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleExport("pdf")} disabled={isExporting}>
+        {/* <DropdownMenuItem onClick={() => handleExport("pdf")} disabled={isExporting}>
           {isExporting && exportFormat === "pdf" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Download className="mr-2 h-4 w-4" />
           )}
           Export as PDF
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
       </DropdownMenuContent>
     </DropdownMenu>
   )
