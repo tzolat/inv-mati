@@ -20,6 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import axios from "axios"
+import { formatNumber } from "@/utils/formatNumber"
 
 interface ProductDetailsProps {
   id: string
@@ -159,7 +160,7 @@ export function ProductDetails({ id }: ProductDetailsProps) {
             </div>
             <div className="flex justify-between">
               <span className="text-sm font-medium">Total Stock:</span>
-              <span>{totalStock} units</span>
+              <span>{formatNumber(totalStock)} units</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm font-medium">Status:</span>
@@ -224,9 +225,9 @@ export function ProductDetails({ id }: ProductDetailsProps) {
                       <tr key={variant._id} className="border-b">
                         <td className="p-2">{variant.name}</td>
                         <td className="p-2">{variant.sku}</td>
-                        <td className="p-2">${variant.costPrice.toFixed(2)}</td>
-                        <td className="p-2">${variant.sellingPrice.toFixed(2)}</td>
-                        <td className="p-2">{variant.currentStock}</td>
+                        <td className="p-2">${formatNumber(variant.costPrice)}</td>
+                        <td className="p-2">${formatNumber(variant.sellingPrice)}</td>
+                        <td className="p-2">{formatNumber(variant.currentStock)}</td>
                         <td className="p-2">{variant.location || "-"}</td>
                         <td className="p-2">
                           {variant.currentStock <= variant.lowStockThreshold ? (
@@ -257,26 +258,26 @@ export function ProductDetails({ id }: ProductDetailsProps) {
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-sm">Cost Price:</span>
-                          <span className="text-sm font-medium">${variant.costPrice.toFixed(2)}</span>
+                          <span className="text-sm font-medium">${formatNumber(variant.costPrice)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Selling Price:</span>
-                          <span className="text-sm font-medium">${variant.sellingPrice.toFixed(2)}</span>
+                          <span className="text-sm font-medium">${formatNumber(variant.sellingPrice)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Profit Margin:</span>
                           <span className="text-sm font-medium">
-                            {(((variant.sellingPrice - variant.costPrice) / variant.sellingPrice) * 100).toFixed(1)}%
+                            {formatNumber(((variant.sellingPrice - variant.costPrice) / variant.sellingPrice) * 100)}%
                           </span>
                         </div>
                         <Separator />
                         <div className="flex justify-between">
                           <span className="text-sm">Current Stock:</span>
-                          <span className="text-sm font-medium">{variant.currentStock}</span>
+                          <span className="text-sm font-medium">{formatNumber(variant.currentStock)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Low Stock Threshold:</span>
-                          <span className="text-sm font-medium">{variant.lowStockThreshold}</span>
+                          <span className="text-sm font-medium">{formatNumber(variant.lowStockThreshold)}</span>
                         </div>
                         {variant.location && (
                           <div className="flex justify-between">
