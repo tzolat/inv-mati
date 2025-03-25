@@ -128,7 +128,6 @@ export function InventoryTable() {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        setError(null); // Reset error state
 
         // Build query string
         const queryParams = new URLSearchParams()
@@ -156,8 +155,7 @@ export function InventoryTable() {
         setProducts(fetchedProducts)
         setPagination(response.data.pagination)
       } catch (error) {
-        console.error("Error fetching products:", error) // Log the error for debugging
-        setError("Failed to load products. Please try again later."); // Set user-friendly error message
+        console.error("Error fetching products:", error)
       } finally {
         setLoading(false)
       }
@@ -362,18 +360,6 @@ export function InventoryTable() {
         </div>
       </div>
     )
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <h3 className="text-lg font-medium">Error Loading Products</h3>
-        <p className="mt-2 text-sm text-muted-foreground">{error}</p>
-        <Button className="mt-4" onClick={() => router.refresh()}>
-          Retry
-        </Button>
-      </div>
-    );
   }
 
   if (sortedProducts.length === 0) {
