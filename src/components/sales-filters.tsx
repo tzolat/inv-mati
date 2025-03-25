@@ -45,7 +45,7 @@ export function SalesFilters({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row">
+      <div className="flex  gap-4 sm:flex-row">
         <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -114,7 +114,7 @@ export function SalesFilters({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between relative">
         <div className="text-sm text-muted-foreground">
           {hasActiveFilters ? "Filtered results" : "Showing all sales"}
         </div>
@@ -125,7 +125,9 @@ export function SalesFilters({
               Clear Filters
             </Button>
           )}
+          <div className="place-self-end">
           <ExportButton endpoint="/api/export/sales" filename="sales-report" params={exportParams} />
+          </div>
         </div>
       </div>
     </div>

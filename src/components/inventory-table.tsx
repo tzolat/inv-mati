@@ -14,7 +14,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Edit, Eye, MoreHorizontal, Plus, Trash, Package, ChevronDown, ChevronRight } from "lucide-react"
+import {
+  Edit,
+  Eye,
+  MoreHorizontal,
+  Plus,
+  Trash,
+  Package,
+  ChevronDown,
+  ChevronRight,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+} from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +42,18 @@ import axios from "axios"
 // Add imports for batch operations
 import { Checkbox } from "@/components/ui/checkbox"
 import { BatchOperations } from "@/components/batch-operations"
-import { formatNumber } from "@/utils/formatNumber";
+import { ColumnVisibility } from "@/components/column-visibility"
+import { formatNumber } from "@/utils/formatNumber"
+
+// Define column configuration
+interface ColumnDef {
+  id: string
+  label: string
+  accessor: (product: any) => any
+  sortable: boolean
+  canHide: boolean
+  isVisible: boolean
+}
 
 export function InventoryTable() {
   const router = useRouter()
@@ -49,6 +72,48 @@ export function InventoryTable() {
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({})
   // Add state for selected items
   const [selectedItems, setSelectedItems] = useState<string[]>([])
+
+  // Add state for sorting
+  const [sorting, setSorting] = useState<{ column: string; direction: "asc" | "desc" } | null>(null)
+
+  // Add state for column visibility
+  const [columns, setColumns] = useState<ColumnDef[]>([
+    { id: "name", label: "Name", accessor: (product) => product.name, sortable: true, canHide: false, isVisible: true },
+    {
+      id: "category",
+      label: "Category",
+      accessor: (product) => product.category,
+      sortable: true,
+      canHide: true,
+      isVisible: true,
+    },
+    {
+      id: "brand",
+      label: "Brand",
+      accessor: (product) => product.brand,
+      sortable: true,
+      canHide: true,
+      isVisible: true,
+    },
+    {
+      id: "variants",
+      label: "Variants",
+      accessor: (product) => product.variants.length,
+      sortable: true,
+      canHide: true,
+      isVisible: true,
+    },
+    {
+      id: "totalStock",
+      label: "Total Stock",
+      accessor: (product) => product.variants.reduce((sum: number, variant: any) => sum + variant.currentStock, 0),
+      sortable: true,
+      canHide: true,
+      isVisible: true,
+    },
+    { id: "status", label: "Status", accessor: () => null, sortable: false, canHide: true, isVisible: true },
+    { id: "actions", label: "Actions", accessor: () => null, sortable: false, canHide: false, isVisible: true },
+  ])
 
   // Get search params
   const search = searchParams.get("search") || ""
@@ -87,6 +152,80 @@ export function InventoryTable() {
 
     fetchProducts()
   }, [search, category, brand, supplier, stockStatus, lowStock, page])
+
+  // Function to handle column visibility changes
+  const handleColumnVisibilityChange = (columnId: string, isVisible: boolean) => {
+    setColumns(columns.map((col) => (col.id === columnId ? { ...col, isVisible } : col)))
+
+    // Save column visibility preferences to localStorage
+    const visibilityPrefs = columns.reduce(
+      (acc, col) => {
+        acc[col.id] = col.id === columnId ? isVisible : col.isVisible
+        return acc
+      },
+      {} as Record<string, boolean>,
+    )
+
+    localStorage.setItem("inventoryTableColumns", JSON.stringify(visibilityPrefs))
+  }
+
+  // Load column visibility preferences from localStorage on initial render
+  useEffect(() => {
+    try {
+      const savedPrefs = localStorage.getItem("inventoryTableColumns")
+      if (savedPrefs) {
+        const prefs = JSON.parse(savedPrefs)
+        setColumns(
+          columns.map((col) => ({
+            ...col,
+            isVisible: prefs[col.id] !== undefined ? prefs[col.id] : col.isVisible,
+          })),
+        )
+      }
+    } catch (error) {
+      console.error("Error loading column preferences:", error)
+    }
+  }, [])
+
+  // Function to handle sorting
+  const handleSort = (columnId: string) => {
+    const column = columns.find((col) => col.id === columnId)
+    if (!column || !column.sortable) return
+
+    if (sorting && sorting.column === columnId) {
+      // Toggle direction if already sorting by this column
+      setSorting({
+        column: columnId,
+        direction: sorting.direction === "asc" ? "desc" : "asc",
+      })
+    } else {
+      // Set new sort column with default ascending direction
+      setSorting({
+        column: columnId,
+        direction: "asc",
+      })
+    }
+  }
+
+  // Apply sorting to products
+  const sortedProducts = [...products]
+  if (sorting) {
+    const column = columns.find((col) => col.id === sorting.column)
+    if (column) {
+      sortedProducts.sort((a, b) => {
+        const aValue = column.accessor(a)
+        const bValue = column.accessor(b)
+
+        // Handle string comparison
+        if (typeof aValue === "string" && typeof bValue === "string") {
+          return sorting.direction === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue)
+        }
+
+        // Handle number comparison
+        return sorting.direction === "asc" ? aValue - bValue : bValue - aValue
+      })
+    }
+  }
 
   const handleDelete = async () => {
     if (!productToDelete) return
@@ -133,10 +272,10 @@ export function InventoryTable() {
 
   // Add function to handle select all
   const toggleSelectAll = () => {
-    if (selectedItems.length === products.length) {
+    if (selectedItems.length === sortedProducts.length) {
       setSelectedItems([])
     } else {
-      setSelectedItems(products.map((product) => product._id))
+      setSelectedItems(sortedProducts.map((product) => product._id))
     }
   }
 
@@ -144,6 +283,14 @@ export function InventoryTable() {
   const handleBatchComplete = () => {
     setSelectedItems([])
     router.refresh()
+  }
+
+  // Function to render sort indicator
+  const renderSortIndicator = (columnId: string) => {
+    if (!sorting || sorting.column !== columnId) {
+      return <ArrowUpDown className="ml-2 h-4 w-4" />
+    }
+    return sorting.direction === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
   }
 
   if (loading) {
@@ -204,7 +351,7 @@ export function InventoryTable() {
     )
   }
 
-  if (products.length === 0) {
+  if (sortedProducts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <div className="rounded-full bg-primary/10 p-3">
@@ -226,34 +373,53 @@ export function InventoryTable() {
 
   return (
     <div>
-      {/* Add batch operations above the table */}
-      <div className="mb-4 flex justify-end">
+      {/* Add batch operations and column visibility controls */}
+      <div className="mb-4 flex justify-between items-center">
         <BatchOperations selectedItems={selectedItems} onComplete={handleBatchComplete} />
+        <ColumnVisibility
+          columns={columns.map((col) => ({
+            id: col.id,
+            label: col.label,
+            isVisible: col.isVisible,
+            canHide: col.canHide,
+          }))}
+          onColumnVisibilityChange={handleColumnVisibilityChange}
+        />
       </div>
       <div className="rounded-md border">
         <Table>
-          {/* Update the table header to include checkbox */}
+          {/* Update the table header to include checkbox and sorting */}
           <TableHeader>
             <TableRow>
               <TableHead className="w-[40px]">
                 <Checkbox
-                  checked={selectedItems.length === products.length && products.length > 0}
+                  checked={selectedItems.length === sortedProducts.length && sortedProducts.length > 0}
                   onCheckedChange={toggleSelectAll}
                   aria-label="Select all"
                 />
               </TableHead>
               <TableHead className="w-[30px]"></TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Brand</TableHead>
-              <TableHead>Variants</TableHead>
-              <TableHead>Total Stock</TableHead>
-              <TableHead>Status</TableHead>
+              {columns.map((column) => {
+                if (!column.isVisible || column.id === "actions") return null
+
+                return (
+                  <TableHead
+                    key={column.id}
+                    className={column.sortable ? "cursor-pointer select-none" : ""}
+                    onClick={column.sortable ? () => handleSort(column.id) : undefined}
+                  >
+                    <div className="flex items-center">
+                      {column.label}
+                      {column.sortable && renderSortIndicator(column.id)}
+                    </div>
+                  </TableHead>
+                )
+              })}
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => {
+            {sortedProducts.map((product) => {
               const totalStock = product.variants.reduce((sum: number, variant: any) => sum + variant.currentStock, 0)
               const hasLowStock = product.variants.some(
                 (variant: any) => variant.currentStock <= variant.lowStockThreshold && variant.currentStock > 0,
@@ -282,26 +448,36 @@ export function InventoryTable() {
                         {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </Button>
                     </TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell>{product.brand}</TableCell>
-                    <TableCell>{product.variants.length}</TableCell>
-                    <TableCell>{formatNumber(totalStock)}</TableCell>
-                    <TableCell>
-                      {hasOutOfStock ? (
-                        <Badge variant="destructive">Out of Stock</Badge>
-                      ) : hasLowStock ? (
-                        <Badge variant="destructive" className="bg-orange-500">
-                          Low Stock
-                        </Badge>
-                      ) : totalStock === 0 ? (
-                        <Badge variant="outline">Out of Stock</Badge>
-                      ) : (
-                        <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
-                          In Stock
-                        </Badge>
-                      )}
-                    </TableCell>
+                    {columns.find((col) => col.id === "name")?.isVisible && (
+                      <TableCell className="font-medium">{product.name}</TableCell>
+                    )}
+                    {columns.find((col) => col.id === "category")?.isVisible && (
+                      <TableCell>{product.category}</TableCell>
+                    )}
+                    {columns.find((col) => col.id === "brand")?.isVisible && <TableCell>{product.brand}</TableCell>}
+                    {columns.find((col) => col.id === "variants")?.isVisible && (
+                      <TableCell>{product.variants.length}</TableCell>
+                    )}
+                    {columns.find((col) => col.id === "totalStock")?.isVisible && (
+                      <TableCell>{formatNumber(totalStock)}</TableCell>
+                    )}
+                    {columns.find((col) => col.id === "status")?.isVisible && (
+                      <TableCell>
+                        {hasOutOfStock ? (
+                          <Badge variant="destructive">Out of Stock</Badge>
+                        ) : hasLowStock ? (
+                          <Badge variant="destructive" className="bg-orange-500">
+                            Low Stock
+                          </Badge>
+                        ) : totalStock === 0 ? (
+                          <Badge variant="outline">Out of Stock</Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
+                            In Stock
+                          </Badge>
+                        )}
+                      </TableCell>
+                    )}
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
