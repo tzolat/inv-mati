@@ -57,7 +57,7 @@ export function NotificationsFilters() {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
-          <Select value={type} onValueChange={setType}>
+          <Select value={type} onValueChange={(value) => setType(value === "all" ? "" : value)}>
             <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="Notification Type" />
             </SelectTrigger>
@@ -74,7 +74,7 @@ export function NotificationsFilters() {
             </SelectContent>
           </Select>
 
-          <Select value={isRead} onValueChange={setIsRead}>
+          <Select value={isRead} onValueChange={(value) => setIsRead(value === "all" ? "" : value)}>
             <SelectTrigger className="w-full sm:w-[200px]">
               <SelectValue placeholder="Read Status" />
             </SelectTrigger>

@@ -128,6 +128,7 @@ export function InventoryTable() {
     const fetchProducts = async () => {
       try {
         setLoading(true)
+        setError(null); // Reset error state
 
         // Build query string
         const queryParams = new URLSearchParams()
@@ -135,16 +136,28 @@ export function InventoryTable() {
         if (category) queryParams.set("category", category)
         if (brand) queryParams.set("brand", brand)
         if (supplier) queryParams.set("supplier", supplier)
-        if (lowStock === "true") queryParams.set("lowStock", "true")
+        if (lowStock === "true") queryParams.set("lowStock", "true") // Ensure lowStock is handled
         if (stockStatus) queryParams.set("stockStatus", stockStatus)
         queryParams.set("page", page.toString())
         queryParams.set("limit", "10")
 
         const response = await axios.get(`/api/products?${queryParams.toString()}`)
-        setProducts(response.data.products)
+        let fetchedProducts = response.data.products
+
+        // Apply low stock filtering if `lowStock=true` is present
+        if (lowStock === "true") {
+          fetchedProducts = fetchedProducts.filter((product: any) =>
+            product.variants.some(
+              (variant: any) => variant.currentStock > 0 && variant.currentStock <= variant.lowStockThreshold,
+            ),
+          )
+        }
+
+        setProducts(fetchedProducts)
         setPagination(response.data.pagination)
       } catch (error) {
-        console.error("Error fetching products:", error)
+        console.error("Error fetching products:", error) // Log the error for debugging
+        setError("Failed to load products. Please try again later."); // Set user-friendly error message
       } finally {
         setLoading(false)
       }
@@ -349,6 +362,18 @@ export function InventoryTable() {
         </div>
       </div>
     )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <h3 className="text-lg font-medium">Error Loading Products</h3>
+        <p className="mt-2 text-sm text-muted-foreground">{error}</p>
+        <Button className="mt-4" onClick={() => router.refresh()}>
+          Retry
+        </Button>
+      </div>
+    );
   }
 
   if (sortedProducts.length === 0) {

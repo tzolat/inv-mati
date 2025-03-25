@@ -198,7 +198,11 @@ export function StockAlerts() {
               <p className="text-xs text-muted-foreground">+{allVariants.length - 5} more items need attention</p>
             )}
 
-            <Button variant="outline" className="w-full" onClick={() => router.push("/inventory?lowStock=true")}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => router.push("/inventory")} // Ensure lowStock=true is passed
+            >
               View all low stock items
             </Button>
           </div>

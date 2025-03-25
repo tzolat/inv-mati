@@ -534,7 +534,7 @@ export function AddSaleForm() {
                       append({
                         product: "",
                         variant: "",
-                        quantity: 1,
+                        quantity: 0,
                       })
                     }
                   >

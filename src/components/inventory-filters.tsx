@@ -101,7 +101,7 @@ export function InventoryFilters() {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
-          <Select value={category} onValueChange={setCategory}>
+          <Select value={category} onValueChange={(value) => setCategory(value === "all" ? "" : value)}>
             <SelectTrigger className="w-full sm:w-[150px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
@@ -115,7 +115,7 @@ export function InventoryFilters() {
             </SelectContent>
           </Select>
 
-          <Select value={brand} onValueChange={setBrand}>
+          <Select value={brand} onValueChange={(value) => setBrand(value === "all" ? "" : value)}>
             <SelectTrigger className="w-full sm:w-[150px]">
               <SelectValue placeholder="Brand" />
             </SelectTrigger>
@@ -129,7 +129,7 @@ export function InventoryFilters() {
             </SelectContent>
           </Select>
 
-          <Select value={supplier} onValueChange={setSupplier}>
+          <Select value={supplier} onValueChange={(value) => setSupplier(value === "all" ? "" : value)}>
             <SelectTrigger className="w-full sm:w-[150px]">
               <SelectValue placeholder="Supplier" />
             </SelectTrigger>
@@ -143,7 +143,7 @@ export function InventoryFilters() {
             </SelectContent>
           </Select>
 
-          <Select value={stockStatus} onValueChange={setStockStatus}>
+          <Select value={stockStatus} onValueChange={(value) => setStockStatus(value === "all" ? "" : value)}>
             <SelectTrigger className="w-full sm:w-[150px]">
               <SelectValue placeholder="Stock Status" />
             </SelectTrigger>
