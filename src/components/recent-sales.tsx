@@ -90,7 +90,11 @@ export function RecentSales() {
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium">${formatNumber(sale.totalAmount)}</p>
+                  {sale.totalProfit >0?
                   <p className="text-xs text-green-500">+${formatNumber(sale.totalProfit)} profit</p>
+                  :
+                  <p className="text-xs text-red-500">-${formatNumber(sale.totalProfit)} loss</p>
+                  }
                 </div>
               </div>
             ))}

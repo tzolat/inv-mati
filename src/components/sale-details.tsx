@@ -155,11 +155,11 @@ export function SaleDetails({ id }: SaleDetailsProps) {
             </div>
             <div className="flex justify-between">
               <span className="text-sm font-medium">Total Profit:</span>
-              <span className="text-green-600 font-medium">${formatNumber(sale.totalProfit)}</span>
+              <span className={`${sale.totalProfit > 0 ?"text-green-600":"text-red-500"} font-medium`}>${formatNumber(sale.totalProfit)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm font-medium">Profit Margin:</span>
-              <span className="font-medium">{formatNumber((sale.totalProfit / sale.totalAmount) * 100)}%</span>
+              <span className={`font-medium ${sale.totalProfit > 0?'text-green-300': 'text-red-500'}`}>{formatNumber((sale.totalProfit / sale.totalAmount) * 100)}%</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm font-medium">Payment Status:</span>
@@ -226,8 +226,8 @@ export function SaleDetails({ id }: SaleDetailsProps) {
                     <td className="p-2">{formatNumber(item.quantity)}</td>
                     <td className="p-2">${formatNumber(item.actualSellingPrice)}</td>
                     <td className="p-2">${formatNumber(item.actualSellingPrice * item.quantity)}</td>
-                    <td className="p-2 text-green-600">${formatNumber(item.profit)}</td>
-                  </tr>
+                    <td className={`p-2 ${sale.totalProfit >0? "text-green-600":"text-red-500"}`}>${formatNumber(sale.totalProfit)}</td>
+                    </tr>
                 ))}
               </tbody>
               <tfoot>
@@ -236,7 +236,7 @@ export function SaleDetails({ id }: SaleDetailsProps) {
                     Total:
                   </td>
                   <td className="p-2">${formatNumber(sale.totalAmount)}</td>
-                  <td className="p-2 text-green-600">${formatNumber(sale.totalProfit)}</td>
+                  <td className={`p-2 ${sale.totalProfit >0? "text-green-600":"text-red-500"}`}>${formatNumber(sale.totalProfit)}</td>
                 </tr>
               </tfoot>
             </table>

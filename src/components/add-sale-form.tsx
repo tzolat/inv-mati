@@ -640,7 +640,11 @@ export function AddSaleForm() {
                         </div>
                         <div className="flex justify-between text-sm text-green-600">
                           <span>Profit:</span>
-                          <span>${formatNumber(totalProfit)}</span>
+                          <span
+                            className={totalProfit < 0 ? "text-red-600" : "text-green-600"}
+                          >
+                            ${formatNumber(totalProfit)}
+                          </span>
                         </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>Profit Margin:</span>
