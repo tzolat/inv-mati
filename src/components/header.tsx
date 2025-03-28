@@ -27,7 +27,7 @@ import { BarChart3, Home, Package, Settings, ShoppingCart } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { UserButton } from "@clerk/nextjs"
+import { UserButton, useUser } from "@clerk/nextjs"
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 
@@ -37,7 +37,8 @@ export default function Header() {
   const [search, setSearch] = useState("")
   const [notifications, setNotifications] = useState<any[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
-
+   const { user } = useUser()
+  const isAdmin = user?.publicMetadata?.role === "admin"
   const [open, setOpen] = useState(false)
  
 
@@ -125,7 +126,7 @@ export default function Header() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0">
-          <SidebarContent className="w-full" unreadCount={unreadCount} setOpen={setOpen} />
+          <SidebarContent className="w-full" unreadCount={unreadCount} setOpen={setOpen} isAdmin={isAdmin}/>
         </SheetContent>
       </Sheet>
       <form onSubmit={handleSearch} className="flex-1 md:flex-initial">
@@ -190,9 +191,11 @@ export default function Header() {
 function SidebarContent({
   className,
   unreadCount,
+  isAdmin,
   setOpen,
 }: SidebarProps & {
   unreadCount: number
+  isAdmin:boolean
   setOpen?: (open: boolean) => void
 }) {
   const pathname = usePathname()
@@ -213,7 +216,7 @@ function SidebarContent({
       </div>
       <ScrollArea className="flex-1 py-2">
         <nav className="grid gap-1 px-2">
-          <Link
+          {isAdmin&&<Link
             href="/"
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
@@ -223,7 +226,7 @@ function SidebarContent({
           >
             <Home className="h-4 w-4" />
             Dashboard
-          </Link>
+          </Link>}
           <Link
             href="/inventory"
             className={cn(
@@ -246,7 +249,7 @@ function SidebarContent({
             <ShoppingCart className="h-4 w-4" />
             Sales
           </Link>
-          <Link
+          {isAdmin&&<Link
             href="/reports"
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
@@ -256,7 +259,7 @@ function SidebarContent({
           >
             <BarChart3 className="h-4 w-4" />
             Reports
-          </Link>
+          </Link>}
           <Link
             href="/notifications"
             className={cn(
@@ -273,7 +276,7 @@ function SidebarContent({
               </span>
             )}
           </Link>
-          <Link
+          {isAdmin&&<Link
             href="/settings"
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
@@ -283,7 +286,7 @@ function SidebarContent({
           >
             <Settings className="h-4 w-4" />
             Settings
-          </Link>
+          </Link>}
         </nav>
       </ScrollArea>
     </div>
