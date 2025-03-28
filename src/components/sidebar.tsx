@@ -1,7 +1,6 @@
 "use client"
 
-import type React from "react"
-
+import React, { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { BarChart3, Bell, Home, Package, Settings, ShoppingCart } from "lucide-react"
@@ -9,8 +8,8 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useState, useEffect } from "react"
 import axios from "axios"
+import { useUser } from "@clerk/nextjs"
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -18,6 +17,8 @@ export default function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
+  const { user } = useUser()
+  const isAdmin = user?.publicMetadata?.role === "admin"
 
   useEffect(() => {
     const fetchUnreadCount = async () => {
@@ -31,10 +32,8 @@ export default function Sidebar({ className }: SidebarProps) {
 
     fetchUnreadCount()
 
-    // Set up interval to check for new notifications more frequently
-    const interval = setInterval(fetchUnreadCount, 15000) // Check every 15 seconds
-
-    // Set up event listener for new notifications
+    // Check for new notifications every 15 seconds.
+    const interval = setInterval(fetchUnreadCount, 15000)
     window.addEventListener("new-notification", fetchUnreadCount)
 
     return () => {
@@ -53,10 +52,10 @@ export default function Sidebar({ className }: SidebarProps) {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="p-0">
-          <SidebarContent className="w-full" unreadCount={unreadCount} setOpen={setOpen} />
+          <SidebarContent className="w-full" unreadCount={unreadCount} setOpen={setOpen} isAdmin={isAdmin} />
         </SheetContent>
       </Sheet>
-      <SidebarContent className="hidden border-r bg-background md:block" unreadCount={unreadCount} />
+      <SidebarContent className="hidden border-r bg-background md:block" unreadCount={unreadCount} isAdmin={isAdmin} />
     </>
   )
 }
@@ -65,8 +64,10 @@ function SidebarContent({
   className,
   unreadCount,
   setOpen,
+  isAdmin
 }: SidebarProps & {
   unreadCount: number
+  isAdmin: boolean
   setOpen?: (open: boolean) => void
 }) {
   const pathname = usePathname()
@@ -87,22 +88,24 @@ function SidebarContent({
       </div>
       <ScrollArea className="flex-1 py-2">
         <nav className="grid gap-1 px-2">
-          <Link
-            href="/"
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-              pathname === "/" ? "bg-accent text-accent-foreground" : "transparent",
-            )}
-            onClick={handleLinkClick}
-          >
-            <Home className="h-4 w-4" />
-            Dashboard
-          </Link>
+          {isAdmin && (
+            <Link
+              href="/"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                pathname === "/" ? "bg-accent text-accent-foreground" : "transparent"
+              )}
+              onClick={handleLinkClick}
+            >
+              <Home className="h-4 w-4" />
+              Dashboard
+            </Link>
+          )}
           <Link
             href="/inventory"
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-              pathname.startsWith("/inventory") ? "bg-accent text-accent-foreground" : "transparent",
+              pathname.startsWith("/inventory") ? "bg-accent text-accent-foreground" : "transparent"
             )}
             onClick={handleLinkClick}
           >
@@ -113,29 +116,31 @@ function SidebarContent({
             href="/sales"
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-              pathname.startsWith("/sales") ? "bg-accent text-accent-foreground" : "transparent",
+              pathname.startsWith("/sales") ? "bg-accent text-accent-foreground" : "transparent"
             )}
             onClick={handleLinkClick}
           >
             <ShoppingCart className="h-4 w-4" />
             Sales
           </Link>
-          <Link
-            href="/reports"
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-              pathname.startsWith("/reports") ? "bg-accent text-accent-foreground" : "transparent",
-            )}
-            onClick={handleLinkClick}
-          >
-            <BarChart3 className="h-4 w-4" />
-            Reports
-          </Link>
+          {isAdmin && (
+            <Link
+              href="/reports"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                pathname.startsWith("/reports") ? "bg-accent text-accent-foreground" : "transparent"
+              )}
+              onClick={handleLinkClick}
+            >
+              <BarChart3 className="h-4 w-4" />
+              Reports
+            </Link>
+          )}
           <Link
             href="/notifications"
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-              pathname.startsWith("/notifications") ? "bg-accent text-accent-foreground" : "transparent",
+              pathname.startsWith("/notifications") ? "bg-accent text-accent-foreground" : "transparent"
             )}
             onClick={handleLinkClick}
           >
@@ -147,20 +152,21 @@ function SidebarContent({
               </span>
             )}
           </Link>
-          <Link
-            href="/settings"
-            className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
-              pathname.startsWith("/settings") ? "bg-accent text-accent-foreground" : "transparent",
-            )}
-            onClick={handleLinkClick}
-          >
-            <Settings className="h-4 w-4" />
-            Settings
-          </Link>
+          {isAdmin && (
+            <Link
+              href="/settings"
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                pathname.startsWith("/settings") ? "bg-accent text-accent-foreground" : "transparent"
+              )}
+              onClick={handleLinkClick}
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </Link>
+          )}
         </nav>
       </ScrollArea>
     </div>
   )
 }
-

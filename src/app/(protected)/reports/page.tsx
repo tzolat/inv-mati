@@ -7,8 +7,15 @@ import { TopProducts } from "@/components/top-products"
 import { ProductProfitAnalysis } from "@/components/product-profit-analysis"
 import { ReportsSkeleton } from "@/components/skeletons/reports-skeleton"
 import { ReportsFilters } from "@/components/reports-filters"
+import { checkRole } from '@/utils/roles';
+import { redirect } from 'next/navigation';
+import React from 'react';
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  const isAdmin = await checkRole('admin')
+if (!isAdmin) {
+  redirect('/inventroy')
+}
   return (
     <div className="flex flex-col gap-6 pb-8">
       <h1 className="text-3xl font-bold">Reports & Analytics</h1>
