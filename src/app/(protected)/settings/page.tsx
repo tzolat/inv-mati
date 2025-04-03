@@ -6,7 +6,7 @@ import React from 'react';
 export default async function SettingsPage() {
   const isAdmin = await checkRole('admin')
 if (!isAdmin) {
-  redirect('/inventroy')
+  redirect('/inventory')
 }
   return (
     <div className="flex flex-col gap-6">

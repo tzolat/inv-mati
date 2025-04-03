@@ -8,7 +8,7 @@ export default function SignInPage() {
       <div className="mx-auto flex w-full flex-col items-center justify-center space-y-6 sm:w-[350px]">
         <div className="flex flex-col space-y-2 text-center">
         
-          <h1 className="text-2xl font-semibold tracking-tight">AutoParts IMS</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Mati's IMS</h1>
           <p className="text-sm text-muted-foreground">Sign in to access your inventory management system</p>
         </div>
 
@@ -33,7 +33,7 @@ export default function SignInPage() {
                 },
               }}
               path="/sign-in"
-              signUpUrl="/sign-up"
+             
               redirectUrl="/" // Ensure this points to a valid route
             />
           </CardContent>

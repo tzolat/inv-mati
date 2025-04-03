@@ -11,7 +11,7 @@ import React from 'react';
 
 export default async function Home() {
 const isAdmin = await checkRole('admin')
-if (!isAdmin) {
+if (isAdmin) {
   redirect('/inventory')
 }
   return (
