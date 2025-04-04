@@ -1,3 +1,4 @@
+'use client'
 import { DashboardCards } from "@/components/dashboard-cards"
 import { RecentSales } from "@/components/recent-sales"
 import { InventoryOverview } from "@/components/inventory-overview"
@@ -8,12 +9,14 @@ import { Button } from "@/components/ui/button"
 import { checkRole } from '@/utils/roles';
 import { redirect } from 'next/navigation';
 import React from 'react';
+import { useUser } from "@clerk/nextjs"
 
-export default async function Home() {
-const isAdmin = await checkRole('admin')
-if (isAdmin) {
-  redirect('/inventory')
-}
+export default  function Home() {
+  const { user } = useUser();
+  
+  if(user?.publicMetadata.role === 'admin' && user?.publicMetadata.role !== 'admin') {
+    redirect('/inventory')
+  }
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-start md:items-center  justify-between">
@@ -41,6 +44,6 @@ if (isAdmin) {
       </div>
       <RecentSales />
     </div>
-  )
+  );
 }
 

@@ -1,4 +1,5 @@
-import { Suspense } from "react"
+'use client'
+import { Suspense, useEffect } from "react"
 
 import { ReportsSummary } from "@/components/reports-summary"
 import { SalesChart } from "@/components/sales-chart"
@@ -10,12 +11,14 @@ import { ReportsFilters } from "@/components/reports-filters"
 import { checkRole } from '@/utils/roles';
 import { redirect } from 'next/navigation';
 import React from 'react';
+import { useUser } from "@clerk/nextjs"
 
 export default async function ReportsPage() {
-  const isAdmin = await checkRole('admin')
-if (!isAdmin) {
-  redirect('/inventory')
-}
+  const { user } = useUser()
+   if(user?.publicMetadata.role !== 'admin') {
+    redirect('/inventory')
+
+   }
   return (
     <div className="flex flex-col gap-6 pb-8">
       <h1 className="text-3xl font-bold">Reports & Analytics</h1>
