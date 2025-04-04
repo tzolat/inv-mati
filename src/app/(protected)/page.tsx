@@ -14,7 +14,7 @@ import { useUser } from "@clerk/nextjs"
 export default  function Home() {
   const { user } = useUser();
   
-  if(user?.publicMetadata.role === 'admin' && user?.publicMetadata.role !== 'admin') {
+  if( user?.publicMetadata.role !== 'admin') {
     redirect('/inventory')
   }
   return (
