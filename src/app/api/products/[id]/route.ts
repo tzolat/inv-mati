@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, { params }: any) {
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }:any) {
   try {
     await connectDB()
 
@@ -80,7 +80,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }:any) {
   try {
     await connectDB()
 
