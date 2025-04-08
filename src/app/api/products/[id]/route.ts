@@ -4,7 +4,7 @@ import Product from "@/lib/models/product"
 import mongoose from "mongoose"
 import Notification from "@/lib/models/notification"
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: any) {
   try {
     await connectDB()
 
