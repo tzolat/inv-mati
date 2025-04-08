@@ -1,5 +1,4 @@
 "use client"
-
 import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -22,6 +21,8 @@ export function InventoryFilters() {
   const [supplier, setSupplier] = useState(searchParams.get("supplier") || "")
   const [stockStatus, setStockStatus] = useState(searchParams.get("stockStatus") || "")
   const [lowStock, setLowStock] = useState(searchParams.get("lowStock") === "true")
+  // Add a new state for flag status
+  const [flagStatus, setFlagStatus] = useState(searchParams.get("flagStatus") || "")
 
   const [categories, setCategories] = useState<string[]>([])
   const [brands, setBrands] = useState<string[]>([])
@@ -63,6 +64,8 @@ export function InventoryFilters() {
     if (supplier) params.set("supplier", supplier)
     if (stockStatus) params.set("stockStatus", stockStatus)
     if (lowStock) params.set("lowStock", "true")
+    // Add flag status to the params in the useEffect
+    if (flagStatus) params.set("flagStatus", flagStatus)
 
     // Debounce to avoid too many router pushes
     const timer = setTimeout(() => {
@@ -70,8 +73,9 @@ export function InventoryFilters() {
     }, 500)
 
     return () => clearTimeout(timer)
-  }, [search, category, brand, supplier, stockStatus, lowStock, router])
+  }, [search, category, brand, supplier, stockStatus, lowStock, flagStatus, router])
 
+  // Add flag status to the resetFilters function
   const resetFilters = () => {
     setSearch("")
     setCategory("")
@@ -79,11 +83,13 @@ export function InventoryFilters() {
     setSupplier("")
     setStockStatus("")
     setLowStock(false)
+    setFlagStatus("")
 
     router.push("/inventory")
   }
 
-  const hasActiveFilters = search || category || brand || supplier || stockStatus || lowStock
+  // Add flag status to the hasActiveFilters check
+  const hasActiveFilters = search || category || brand || supplier || stockStatus || lowStock || flagStatus
 
   return (
     <div className="space-y-4">
@@ -101,7 +107,7 @@ export function InventoryFilters() {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
-          <Select value={category} onValueChange={(value) => setCategory(value === "all" ? "" : value)}>
+          <Select value={category} onValueChange={setCategory}>
             <SelectTrigger className="w-full sm:w-[150px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
@@ -114,8 +120,7 @@ export function InventoryFilters() {
               ))}
             </SelectContent>
           </Select>
-
-          <Select value={brand} onValueChange={(value) => setBrand(value === "all" ? "" : value)}>
+          <Select value={brand} onValueChange={setBrand}>
             <SelectTrigger className="w-full sm:w-[150px]">
               <SelectValue placeholder="Brand" />
             </SelectTrigger>
@@ -128,8 +133,7 @@ export function InventoryFilters() {
               ))}
             </SelectContent>
           </Select>
-
-          <Select value={supplier} onValueChange={(value) => setSupplier(value === "all" ? "" : value)}>
+          <Select value={supplier} onValueChange={setSupplier}>
             <SelectTrigger className="w-full sm:w-[150px]">
               <SelectValue placeholder="Supplier" />
             </SelectTrigger>
@@ -142,8 +146,7 @@ export function InventoryFilters() {
               ))}
             </SelectContent>
           </Select>
-
-          <Select value={stockStatus} onValueChange={(value) => setStockStatus(value === "all" ? "" : value)}>
+          <Select value={stockStatus} onValueChange={setStockStatus}>
             <SelectTrigger className="w-full sm:w-[150px]">
               <SelectValue placeholder="Stock Status" />
             </SelectTrigger>
@@ -154,7 +157,17 @@ export function InventoryFilters() {
               <SelectItem value="out-of-stock">Out of Stock</SelectItem>
             </SelectContent>
           </Select>
-
+          {/* // Add the flag status filter dropdown in the UI // Add this inside the filters section */}
+          <Select value={flagStatus} onValueChange={setFlagStatus}>
+            <SelectTrigger className="w-full sm:w-[150px]">
+              <SelectValue placeholder="Documentation" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="green">Green Flag</SelectItem>
+              <SelectItem value="red">Red Flag</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="flex items-center space-x-2 rounded-md border px-3 py-2">
             <Checkbox id="lowStock" checked={lowStock} onCheckedChange={(checked) => setLowStock(checked as boolean)} />
             <Label htmlFor="lowStock" className="text-sm cursor-pointer">
@@ -181,4 +194,3 @@ export function InventoryFilters() {
     </div>
   )
 }
-

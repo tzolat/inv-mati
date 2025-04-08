@@ -18,7 +18,6 @@ import { Badge } from "@/components/ui/badge"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import axios from "axios"
-import { formatNumber } from "@/utils/formatNumber"
 
 // Define schema for form validation
 const saleItemSchema = z.object({
@@ -28,11 +27,13 @@ const saleItemSchema = z.object({
   actualSellingPrice: z.coerce.number().min(0, "Price must be a positive number").optional(),
 })
 
+// Update the sale schema to include flagStatus
 const saleSchema = z.object({
   customer: z.string().optional(),
   items: z.array(saleItemSchema).min(1, "At least one item is required"),
   paymentMethod: z.string().min(1, "Payment method is required"),
   paymentStatus: z.string().min(1, "Payment status is required"),
+  flagStatus: z.enum(["green", "red"]).default("green"), // Added flag status field
   notes: z.string().optional(),
 })
 
@@ -52,6 +53,7 @@ export function AddSaleForm() {
   const [filteredProducts, setFilteredProducts] = useState<any[]>([])
 
   // Initialize form with default values
+  // Update the form's default values to include flagStatus
   const form = useForm<SaleFormValues>({
     resolver: zodResolver(saleSchema),
     defaultValues: {
@@ -60,11 +62,12 @@ export function AddSaleForm() {
         {
           product: "",
           variant: "",
-          quantity: 0,
+          quantity: 1,
         },
       ],
       paymentMethod: "Cash",
       paymentStatus: "Completed",
+      flagStatus: "green", // Add default flag status
       notes: "",
     },
   })
@@ -160,28 +163,13 @@ export function AddSaleForm() {
     setTotalProfit(calculatedProfit)
   }, [form, selectedProducts, selectedVariants])
 
-  // Debounce utility
-  function debounce(func: Function, wait: number) {
-    let timeout: NodeJS.Timeout;
-    return (...args: any[]) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
-    };
-  }
-
-  // Debounced version of calculateReceiptItems
-  const debouncedCalculateReceiptItems = useCallback(
-    debounce(() => calculateReceiptItems(), 300),
-    [calculateReceiptItems]
-  );
-
-  // Update receipt when specific form fields change
+  // Update receipt when form values change
   useEffect(() => {
     const subscription = form.watch((values) => {
-      debouncedCalculateReceiptItems();
+      calculateReceiptItems(); // Recalculate only when form values change
     });
-    return () => subscription.unsubscribe();
-  }, [form, debouncedCalculateReceiptItems]);
+    return () => subscription.unsubscribe(); // Clean up subscription
+  }, [form, calculateReceiptItems])
 
   // Handle product selection
   const handleProductChange = (value: string, index: number) => {
@@ -261,14 +249,7 @@ export function AddSaleForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Payment Method</FormLabel>
-                      <Select
-                        defaultValue={field.value}
-                        onValueChange={(value) => {
-                          if (field.value !== value) {
-                            field.onChange(value); // Only update if the value has changed
-                          }
-                        }}
-                      >
+                      <Select defaultValue={field.value} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select payment method" />
@@ -276,11 +257,10 @@ export function AddSaleForm() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="Cash">Cash</SelectItem>
-                          <SelectItem value="CBE">CBE</SelectItem>
-                          <SelectItem value="Abyssinia">Abyssinia</SelectItem>
-                          <SelectItem value="Awash">Awash</SelectItem>
-                          <SelectItem value="Zemen">Zemen</SelectItem>
-                          <SelectItem value="Telebirr">Telebirr</SelectItem>
+                          <SelectItem value="Credit Card">Credit Card</SelectItem>
+                          <SelectItem value="Debit Card">Debit Card</SelectItem>
+                          <SelectItem value="Bank Transfer">Bank Transfer</SelectItem>
+                          <SelectItem value="Mobile Payment">Mobile Payment</SelectItem>
                           <SelectItem value="Check">Check</SelectItem>
                         </SelectContent>
                       </Select>
@@ -295,14 +275,7 @@ export function AddSaleForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Payment Status</FormLabel>
-                      <Select
-                        defaultValue={field.value}
-                        onValueChange={(value) => {
-                          if (field.value !== value) {
-                            field.onChange(value); // Only update if the value has changed
-                          }
-                        }}
-                      >
+                      <Select defaultValue={field.value} onValueChange={field.onChange}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select payment status" />
@@ -313,12 +286,39 @@ export function AddSaleForm() {
                           <SelectItem value="Pending">Pending</SelectItem>
                         </SelectContent>
                       </Select>
-                      
+                      <FormDescription>
+                        Choose "Completed" for fully paid sales or "Pending" for sales awaiting payment
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+
+              {/* Add the flag status field to the form */}
+              {/* Add this after the payment status field */}
+              <FormField
+                control={form.control}
+                name="flagStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Documentation Status</FormLabel>
+                    <Select defaultValue={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select documentation status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="green">Green Flag</SelectItem>
+                        <SelectItem value="red">Red Flag</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>Indicates whether this sale has proper documentation</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -380,17 +380,28 @@ export function AddSaleForm() {
                                   </PopoverTrigger>
                                   <PopoverContent className="w-[300px] p-0" align="start">
                                     <Command className={''}>
-                                      <CommandInput className={''} placeholder="Search products..." onValueChange={setSearchQuery} />
+                                      <CommandInput
+                                        className=""
+                                        placeholder="Search products..."
+                                        onValueChange={(value) => {
+                                          if (value.trim() !== searchQuery.trim()) {
+                                            setSearchQuery(value.trim()); // Only update state if the trimmed value has changed
+                                          }
+                                        }}
+                                      />
                                       <CommandList className={''}>
                                         <CommandEmpty>No products found.</CommandEmpty>
                                         <CommandGroup className={''}>
                                           {filteredProducts.map((product) => (
-                                            <CommandItem className={''}
+                                            <CommandItem
+                                              className=""
                                               key={product._id}
                                               value={product._id}
                                               onSelect={() => {
-                                                field.onChange(product._id)
-                                                handleProductChange(product._id, index)
+                                                if (selectedProducts[index]?._id !== product._id) {
+                                                  field.onChange(product._id);
+                                                  handleProductChange(product._id, index); // Only update if the product has changed
+                                                }
                                               }}
                                             >
                                               <div className="flex flex-col">
@@ -460,7 +471,7 @@ export function AddSaleForm() {
                                   <Input
                                     type="number"
                                     min="1"
-                                    max={selectedVariants[index]?.currentStock || 0}
+                                    max={selectedVariants[index]?.currentStock || 1}
                                     {...field}
                                     onChange={(e) => {
                                       field.onChange(e)
@@ -534,7 +545,7 @@ export function AddSaleForm() {
                       append({
                         product: "",
                         variant: "",
-                        quantity: 0,
+                        quantity: 1,
                       })
                     }
                   >
@@ -607,16 +618,9 @@ export function AddSaleForm() {
                         <div key={i} className="flex justify-between text-sm">
                           <span className="flex-1 truncate">{item.name}</span>
                           <div className="flex">
-                            <span className="w-16 text-right">{formatNumber(item.quantity)}</span>
-                            <span className="w-20 text-right">${formatNumber(Number(item.unitPrice))}</span>
-                            <span className="w-24 text-right">${formatNumber(item.totalPrice)}</span>
-                            <span
-                              className={`w-24 text-right ${
-                                item.profit < 0 ? "text-red-600" : "text-green-600"
-                              }`}
-                            >
-                              ${formatNumber(item.profit)}
-                            </span>
+                            <span className="w-16 text-right">{item.quantity}</span>
+                            <span className="w-20 text-right">${item.unitPrice.toFixed(2)}</span>
+                            <span className="w-24 text-right">${item.totalPrice.toFixed(2)}</span>
                           </div>
                         </div>
                       ))}
@@ -632,23 +636,19 @@ export function AddSaleForm() {
                       <div className="space-y-1 pt-2">
                         <div className="flex justify-between text-sm">
                           <span>Subtotal:</span>
-                          <span>${formatNumber(subtotal)}</span>
+                          <span>${subtotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm font-medium">
                           <span>Total:</span>
-                          <span>${formatNumber(subtotal)}</span>
+                          <span>${subtotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm text-green-600">
                           <span>Profit:</span>
-                          <span
-                            className={totalProfit < 0 ? "text-red-600" : "text-green-600"}
-                          >
-                            ${formatNumber(totalProfit)}
-                          </span>
+                          <span>${totalProfit.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>Profit Margin:</span>
-                          <span>{subtotal > 0 ? formatNumber((totalProfit / subtotal) * 100) : 0}%</span>
+                          <span>{subtotal > 0 ? ((totalProfit / subtotal) * 100).toFixed(1) : 0}%</span>
                         </div>
                       </div>
                     </>
@@ -665,4 +665,3 @@ export function AddSaleForm() {
     </div>
   )
 }
-

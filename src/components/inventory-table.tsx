@@ -43,7 +43,6 @@ import axios from "axios"
 import { Checkbox } from "@/components/ui/checkbox"
 import { BatchOperations } from "@/components/batch-operations"
 import { ColumnVisibility } from "@/components/column-visibility"
-import { formatNumber } from "@/utils/formatNumber"
 
 // Define column configuration
 interface ColumnDef {
@@ -112,6 +111,17 @@ export function InventoryTable() {
       isVisible: true,
     },
     { id: "status", label: "Status", accessor: () => null, sortable: false, canHide: true, isVisible: true },
+    {
+      id: "flagStatus",
+      label: "Documentation",
+      accessor: (product) => {
+        // Check if any variant has a red flag
+        return product.variants.some((v: any) => v.flagStatus === "red") ? "red" : "green"
+      },
+      sortable: true,
+      canHide: true,
+      isVisible: true,
+    },
     { id: "actions", label: "Actions", accessor: () => null, sortable: false, canHide: false, isVisible: true },
   ])
 
@@ -123,6 +133,7 @@ export function InventoryTable() {
   const stockStatus = searchParams.get("stockStatus") || ""
   const lowStock = searchParams.get("lowStock") || ""
   const page = Number.parseInt(searchParams.get("page") || "1")
+  const flagStatus = searchParams.get("flagStatus") || ""
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -135,24 +146,14 @@ export function InventoryTable() {
         if (category) queryParams.set("category", category)
         if (brand) queryParams.set("brand", brand)
         if (supplier) queryParams.set("supplier", supplier)
-        if (lowStock === "true") queryParams.set("lowStock", "true") // Ensure lowStock is handled
+        if (lowStock === "true") queryParams.set("lowStock", "true")
         if (stockStatus) queryParams.set("stockStatus", stockStatus)
+        if (flagStatus) queryParams.set("flagStatus", flagStatus)
         queryParams.set("page", page.toString())
         queryParams.set("limit", "10")
 
         const response = await axios.get(`/api/products?${queryParams.toString()}`)
-        let fetchedProducts = response.data.products
-
-        // Apply low stock filtering if `lowStock=true` is present
-        if (lowStock === "true") {
-          fetchedProducts = fetchedProducts.filter((product: any) =>
-            product.variants.some(
-              (variant: any) => variant.currentStock > 0 && variant.currentStock <= variant.lowStockThreshold,
-            ),
-          )
-        }
-
-        setProducts(fetchedProducts)
+        setProducts(response.data.products)
         setPagination(response.data.pagination)
       } catch (error) {
         console.error("Error fetching products:", error)
@@ -162,7 +163,7 @@ export function InventoryTable() {
     }
 
     fetchProducts()
-  }, [search, category, brand, supplier, stockStatus, lowStock, page])
+  }, [search, category, brand, supplier, stockStatus, lowStock, flagStatus, page])
 
   // Function to handle column visibility changes
   const handleColumnVisibilityChange = (columnId: string, isVisible: boolean) => {
@@ -304,6 +305,12 @@ export function InventoryTable() {
     return sorting.direction === "asc" ? <ArrowUp className="ml-2 h-4 w-4" /> : <ArrowDown className="ml-2 h-4 w-4" />
   }
 
+  // Function to check if a product has any red-flagged variants
+  const hasRedFlag = (product: any) => {
+    if (!product.variants || product.variants.length === 0) return false
+    return product.variants.some((variant: any) => variant.flagStatus === "red")
+  }
+
   if (loading) {
     return (
       <div>
@@ -370,7 +377,7 @@ export function InventoryTable() {
         </div>
         <h3 className="mt-4 text-lg font-medium">No products found</h3>
         <p className="mt-2 text-sm text-muted-foreground max-w-sm">
-          {search || category || brand || supplier || lowStock || stockStatus
+          {search || category || brand || supplier || lowStock || stockStatus || flagStatus
             ? "No products match your current filters. Try adjusting your search criteria."
             : "You haven't added any products yet. Add your first product to get started."}
         </p>
@@ -437,6 +444,7 @@ export function InventoryTable() {
               )
               const hasOutOfStock = product.variants.some((variant: any) => variant.currentStock === 0)
               const isExpanded = expandedRows[product._id] || false
+              const productHasRedFlag = hasRedFlag(product)
 
               return (
                 <>
@@ -469,9 +477,7 @@ export function InventoryTable() {
                     {columns.find((col) => col.id === "variants")?.isVisible && (
                       <TableCell>{product.variants.length}</TableCell>
                     )}
-                    {columns.find((col) => col.id === "totalStock")?.isVisible && (
-                      <TableCell>{formatNumber(totalStock)}</TableCell>
-                    )}
+                    {columns.find((col) => col.id === "totalStock")?.isVisible && <TableCell>{totalStock}</TableCell>}
                     {columns.find((col) => col.id === "status")?.isVisible && (
                       <TableCell>
                         {hasOutOfStock ? (
@@ -485,6 +491,19 @@ export function InventoryTable() {
                         ) : (
                           <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
                             In Stock
+                          </Badge>
+                        )}
+                      </TableCell>
+                    )}
+                    {columns.find((col) => col.id === "flagStatus")?.isVisible && (
+                      <TableCell>
+                        {productHasRedFlag ? (
+                          <Badge variant="outline" className="bg-red-100 text-red-800">
+                            Red Flag
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="bg-green-100 text-green-800">
+                            Green Flag
                           </Badge>
                         )}
                       </TableCell>
@@ -537,6 +556,7 @@ export function InventoryTable() {
                                   <TableHead>Current Stock</TableHead>
                                   <TableHead>Threshold</TableHead>
                                   <TableHead>Location</TableHead>
+                                  <TableHead>Documentation</TableHead>
                                   <TableHead>Status</TableHead>
                                 </TableRow>
                               </TableHeader>
@@ -545,11 +565,22 @@ export function InventoryTable() {
                                   <TableRow key={`${product._id}-${variant.name}`}>
                                     <TableCell>{variant.name}</TableCell>
                                     <TableCell>{variant.sku}</TableCell>
-                                    <TableCell>${formatNumber(variant.costPrice)}</TableCell>
-                                    <TableCell>${formatNumber(variant.sellingPrice)}</TableCell>
-                                    <TableCell>{formatNumber(variant.currentStock)}</TableCell>
-                                    <TableCell>{formatNumber(variant.lowStockThreshold)}</TableCell>
+                                    <TableCell>${variant.costPrice.toFixed(2)}</TableCell>
+                                    <TableCell>${variant.sellingPrice.toFixed(2)}</TableCell>
+                                    <TableCell>{variant.currentStock}</TableCell>
+                                    <TableCell>{variant.lowStockThreshold}</TableCell>
                                     <TableCell>{variant.location || "-"}</TableCell>
+                                    <TableCell>
+                                      {variant.flagStatus === "red" ? (
+                                        <Badge variant="outline" className="bg-red-100 text-red-800">
+                                          Red Flag
+                                        </Badge>
+                                      ) : (
+                                        <Badge variant="outline" className="bg-green-100 text-green-800">
+                                          Green Flag
+                                        </Badge>
+                                      )}
+                                    </TableCell>
                                     <TableCell>
                                       {variant.currentStock === 0 ? (
                                         <Badge variant="destructive">Out of Stock</Badge>
@@ -612,4 +643,3 @@ export function InventoryTable() {
     </div>
   )
 }
-

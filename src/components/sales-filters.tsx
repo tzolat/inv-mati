@@ -20,6 +20,8 @@ interface SalesFiltersProps {
   endDateValue: Date | undefined
   paymentStatusValue: string
   exportParams: Record<string, string>
+  flagStatusValue: string
+  onFlagStatusChange: (status: string) => void
 }
 
 export function SalesFilters({
@@ -32,20 +34,27 @@ export function SalesFilters({
   endDateValue,
   paymentStatusValue,
   exportParams,
+  flagStatusValue,
+  onFlagStatusChange,
 }: SalesFiltersProps) {
   const resetFilters = () => {
     onSearchChange("")
     onStartDateChange(undefined)
     onEndDateChange(undefined)
     onPaymentStatusChange("all")
+    onFlagStatusChange("all")
   }
 
   const hasActiveFilters =
-    searchValue || startDateValue || endDateValue || (paymentStatusValue && paymentStatusValue !== "all")
+    searchValue ||
+    startDateValue ||
+    endDateValue ||
+    (paymentStatusValue && paymentStatusValue !== "all") ||
+    (flagStatusValue && flagStatusValue !== "all")
 
   return (
     <div className="space-y-4">
-      <div className="flex  gap-4 sm:flex-row">
+      <div className="flex flex-col gap-4 sm:flex-row">
         <div className="flex-1">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -111,10 +120,21 @@ export function SalesFilters({
               <SelectItem value="Pending">Pending</SelectItem>
             </SelectContent>
           </Select>
+
+          <Select value={flagStatusValue} onValueChange={onFlagStatusChange}>
+            <SelectTrigger className="sm:w-[200px]">
+              <SelectValue placeholder="Documentation Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Documentation</SelectItem>
+              <SelectItem value="green">Green Flag</SelectItem>
+              <SelectItem value="red">Red Flag</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      <div className="flex items-center justify-between relative">
+      <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           {hasActiveFilters ? "Filtered results" : "Showing all sales"}
         </div>
@@ -125,12 +145,9 @@ export function SalesFilters({
               Clear Filters
             </Button>
           )}
-          <div className="place-self-end">
           <ExportButton endpoint="/api/export/sales" filename="sales-report" params={exportParams} />
-          </div>
         </div>
       </div>
     </div>
   )
 }
-

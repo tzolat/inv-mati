@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import axios from "axios"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Define schema for form validation
 const variantSchema = z.object({
@@ -26,6 +27,7 @@ const variantSchema = z.object({
   currentStock: z.coerce.number().min(0, "Stock must be a positive number"),
   lowStockThreshold: z.coerce.number().min(1, "Low stock threshold must be at least 1"),
   location: z.string().optional(),
+  flagStatus: z.enum(["green", "red"]).optional(),
 })
 
 const productSchema = z.object({
@@ -367,6 +369,29 @@ export function EditProductForm({ id }: EditProductFormProps) {
                       </FormItem>
                     )}
                   />
+
+                  <FormField
+                    control={form.control}
+                    name={`variants.${index}.flagStatus`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Documentation Status</FormLabel>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="green">Green Flag</SelectItem>
+                            <SelectItem value="red">Red Flag</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>Indicates whether this item has proper documentation</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 {fields.length > 1 && (
@@ -392,6 +417,7 @@ export function EditProductForm({ id }: EditProductFormProps) {
                 currentStock: 0,
                 lowStockThreshold: 5,
                 location: "",
+                flagStatus: undefined,
               })
             }
           >
@@ -412,4 +438,3 @@ export function EditProductForm({ id }: EditProductFormProps) {
     </Form>
   )
 }
-

@@ -5,7 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { redirect } from 'next/navigation';
 import React, { useEffect } from 'react';
 
-export default async function SettingsPage() {
+export default  function SettingsPage() {
   const { user } = useUser()
    if(user?.publicMetadata.role !== 'admin') {
     redirect('/inventory')

@@ -14,7 +14,7 @@ import { Trash, Plus } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import axios from "axios"
-import { formatNumber } from "@/utils/formatNumber"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Add a function to generate SKUs automatically
 // Add this function after the imports and before the AddProductForm component
@@ -48,6 +48,7 @@ const variantSchema = z.object({
   currentStock: z.coerce.number().min(0, "Stock must be a positive number"),
   lowStockThreshold: z.coerce.number().min(1, "Low stock threshold must be at least 1"),
   location: z.string().optional(),
+  flagStatus: z.enum(["green", "red"]).default("green"),
 })
 
 const productSchema = z.object({
@@ -83,6 +84,7 @@ export function AddProductForm() {
           currentStock: 0,
           lowStockThreshold: 5,
           location: "",
+          flagStatus: "green",
         },
       ],
     },
@@ -269,7 +271,7 @@ export function AddProductForm() {
                       <FormItem>
                         <FormLabel>Cost Price</FormLabel>
                         <FormControl>
-                          <Input type="number" value={formatNumber(field.value)} {...field} />
+                          <Input type="number" min="0" step="0.01" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -283,7 +285,7 @@ export function AddProductForm() {
                       <FormItem>
                         <FormLabel>Selling Price</FormLabel>
                         <FormControl>
-                          <Input type="number" value={formatNumber(field.value)} {...field} />
+                          <Input type="number" min="0" step="0.01" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -297,7 +299,7 @@ export function AddProductForm() {
                       <FormItem>
                         <FormLabel>Current Stock</FormLabel>
                         <FormControl>
-                          <Input type="number" value={formatNumber(field.value)} {...field} />
+                          <Input type="number" min="0" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -311,7 +313,7 @@ export function AddProductForm() {
                       <FormItem>
                         <FormLabel>Low Stock Threshold</FormLabel>
                         <FormControl>
-                          <Input type="number" value={formatNumber(field.value)} {...field} />
+                          <Input type="number" min="1" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -327,6 +329,29 @@ export function AddProductForm() {
                         <FormControl>
                           <Input placeholder="e.g. Shelf A3, Warehouse B" {...field} />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name={`variants.${index}.flagStatus`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Documentation Status</FormLabel>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="green">Green Flag</SelectItem>
+                            <SelectItem value="red">Red Flag</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>Indicates whether this item has proper documentation</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -357,6 +382,7 @@ export function AddProductForm() {
                 currentStock: 0,
                 lowStockThreshold: 5,
                 location: "",
+                flagStatus: "green", // Add default flag status
               })
             }}
           >
@@ -377,4 +403,3 @@ export function AddProductForm() {
     </Form>
   )
 }
-

@@ -23,6 +23,7 @@ export async function POST(req: Request) {
         return {
           ...variant,
           currentStock: 0,
+          // No need to modify flagStatus as we're preserving it with the spread operator above
         }
       })
 
@@ -48,4 +49,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to mark products as out of stock" }, { status: 500 })
   }
 }
-

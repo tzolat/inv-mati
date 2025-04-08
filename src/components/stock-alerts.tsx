@@ -178,7 +178,7 @@ export function StockAlerts() {
                   <p className="font-medium">
                     {item.product.name} - {item.variant.name}
                   </p>
-                  <div className="flex place-items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
                     {item.status === "out-of-stock" ? (
                       <Badge variant="destructive">Out of Stock</Badge>
                     ) : (
@@ -186,7 +186,14 @@ export function StockAlerts() {
                         Low Stock: {item.variant.currentStock}/{item.variant.lowStockThreshold}
                       </Badge>
                     )}
-                    <Button variant="outline" size="sm" onClick={() => openRestockDialog(item.product, item.variant)} className="-mt-7">
+
+                    {item.variant.flagStatus === "red" && (
+                      <Badge variant="outline" className="bg-red-100 text-red-800">
+                        Red Flag
+                      </Badge>
+                    )}
+
+                    <Button variant="outline" size="sm" onClick={() => openRestockDialog(item.product, item.variant)}>
                       <Plus className="mr-1 h-3 w-3" /> Restock
                     </Button>
                   </div>
@@ -198,11 +205,7 @@ export function StockAlerts() {
               <p className="text-xs text-muted-foreground">+{allVariants.length - 5} more items need attention</p>
             )}
 
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => router.push("/inventory")} // Ensure lowStock=true is passed
-            >
+            <Button variant="outline" className="w-full" onClick={() => router.push("/inventory?lowStock=true")}>
               View all low stock items
             </Button>
           </div>
@@ -258,4 +261,3 @@ export function StockAlerts() {
     </Card>
   )
 }
-

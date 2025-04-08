@@ -9,6 +9,7 @@ export interface ProductVariant {
   currentStock: number
   lowStockThreshold: number
   location?: string
+  flagStatus: "green" | "red" // Added flag status field
 }
 
 export interface Product {
@@ -43,6 +44,7 @@ export interface Sale {
   totalProfit: number
   paymentMethod: string
   paymentStatus: string
+  flagStatus: "green" | "red" // Added flag status field
   notes?: string
   createdAt: Date
   updatedAt: Date
@@ -62,4 +64,3 @@ export interface InventoryOverviewData {
 export function isProduct(obj: any): obj is Product {
   return obj && typeof obj === "object" && "name" in obj && "brand" in obj && "category" in obj && "variants" in obj
 }
-

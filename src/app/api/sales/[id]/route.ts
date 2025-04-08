@@ -4,7 +4,7 @@ import Sale from "@/lib/models/sale"
 import mongoose from "mongoose"
 import Notification from "@/lib/models/notification"
 
-export async function GET(req: NextRequest, { params }:any) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectDB()
 
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest, { params }:any) {
   }
 }
 
-export async function DELETE(req: NextRequest, { params }:any) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectDB()
 
@@ -55,7 +55,7 @@ export async function DELETE(req: NextRequest, { params }:any) {
   }
 }
 
-export async function PUT(req: NextRequest, { params }:any) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectDB()
 
@@ -79,6 +79,7 @@ export async function PUT(req: NextRequest, { params }:any) {
     if (body.paymentMethod) sale.paymentMethod = body.paymentMethod
     if (body.paymentStatus) sale.paymentStatus = body.paymentStatus
     if (body.notes !== undefined) sale.notes = body.notes
+    if (body.flagStatus) sale.flagStatus = body.flagStatus
 
     sale.updatedAt = new Date()
 
@@ -100,4 +101,3 @@ export async function PUT(req: NextRequest, { params }:any) {
     return NextResponse.json({ error: "Failed to update sale" }, { status: 500 })
   }
 }
-

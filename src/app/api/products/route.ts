@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
     const page = Number.parseInt(searchParams.get("page") || "1")
     const limit = Number.parseInt(searchParams.get("limit") || "10")
     const skip = (page - 1) * limit
+    const flagStatus = searchParams.get("flagStatus") || ""
 
     // Build query
     const query: any = {}
@@ -36,6 +37,31 @@ export async function GET(req: NextRequest) {
 
     if (lowStock) {
       query["variants.currentStock"] = { $lte: "$variants.lowStockThreshold" }
+    }
+
+    // Add flag status to the query
+    if (flagStatus === "green" || flagStatus === "red") {
+      if (flagStatus === "red") {
+        // Show products where ANY variant has a red flag
+        // Use aggregate to filter products with any red-flagged variant
+        const productsWithRedFlags = await Product.find({
+          "variants.flagStatus": "red",
+        })
+
+        // Extract product IDs to use in main query
+        const productIds = productsWithRedFlags.map((p) => p._id)
+        query._id = { $in: productIds }
+      } else {
+        // Show products where ALL variants have green flags
+        // Use aggregate to filter products with any red-flagged variant
+        const productsWithRedFlags = await Product.find({
+          "variants.flagStatus": "red",
+        })
+
+        // Extract product IDs to use in main query
+        const productIds = productsWithRedFlags.map((p) => p._id)
+        query._id = { $nin: productIds }
+      }
     }
 
     // Handle stock status filter
@@ -147,6 +173,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "One or more SKUs already exist" }, { status: 400 })
     }
 
+    // Make sure each variant has a flagStatus set, default to green if not provided
+    if (body.variants && body.variants.length > 0) {
+      body.variants = body.variants.map((variant: any) => {
+        return {
+          ...variant,
+          flagStatus: variant.flagStatus || "green",
+        }
+      })
+    }
+
     // Create new product
     const newProduct = await Product.create(body)
 
@@ -170,4 +206,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to create product" }, { status: 500 })
   }
 }
-

@@ -20,7 +20,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import axios from "axios"
-import { formatNumber } from "@/utils/formatNumber"
+import { TableCell } from "@/components/ui/table"
 
 interface ProductDetailsProps {
   id: string
@@ -54,6 +54,12 @@ export function ProductDetails({ id }: ProductDetailsProps) {
     } catch (error) {
       console.error("Error deleting product:", error)
     }
+  }
+
+  // Function to check if a product has any red-flagged variants
+  const hasRedFlag = (product: any) => {
+    if (!product || !product.variants || product.variants.length === 0) return false
+    return product.variants.some((variant: any) => variant.flagStatus === "red")
   }
 
   if (loading) {
@@ -123,6 +129,7 @@ export function ProductDetails({ id }: ProductDetailsProps) {
   // Calculate total stock and check if any variant is low in stock
   const totalStock = product.variants.reduce((sum: number, variant: any) => sum + variant.currentStock, 0)
   const hasLowStock = product.variants.some((variant: any) => variant.currentStock <= variant.lowStockThreshold)
+  const productHasRedFlag = hasRedFlag(product)
 
   return (
     <div className="space-y-6">
@@ -160,7 +167,7 @@ export function ProductDetails({ id }: ProductDetailsProps) {
             </div>
             <div className="flex justify-between">
               <span className="text-sm font-medium">Total Stock:</span>
-              <span>{formatNumber(totalStock)} units</span>
+              <span>{totalStock} units</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm font-medium">Status:</span>
@@ -172,6 +179,20 @@ export function ProductDetails({ id }: ProductDetailsProps) {
                 ) : (
                   <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-100">
                     In Stock
+                  </Badge>
+                )}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm font-medium">Documentation Status:</span>
+              <span>
+                {productHasRedFlag ? (
+                  <Badge variant="outline" className="bg-red-100 text-red-800">
+                    Red Flag
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-green-100 text-green-800">
+                    Green Flag
                   </Badge>
                 )}
               </span>
@@ -218,6 +239,7 @@ export function ProductDetails({ id }: ProductDetailsProps) {
                       <th className="p-2 text-left font-medium">Stock</th>
                       <th className="p-2 text-left font-medium">Location</th>
                       <th className="p-2 text-left font-medium">Status</th>
+                      <th className="p-2 text-left font-medium">Documentation</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -225,9 +247,9 @@ export function ProductDetails({ id }: ProductDetailsProps) {
                       <tr key={variant._id} className="border-b">
                         <td className="p-2">{variant.name}</td>
                         <td className="p-2">{variant.sku}</td>
-                        <td className="p-2">${formatNumber(variant.costPrice)}</td>
-                        <td className="p-2">${formatNumber(variant.sellingPrice)}</td>
-                        <td className="p-2">{formatNumber(variant.currentStock)}</td>
+                        <td className="p-2">${variant.costPrice.toFixed(2)}</td>
+                        <td className="p-2">${variant.sellingPrice.toFixed(2)}</td>
+                        <td className="p-2">{variant.currentStock}</td>
                         <td className="p-2">{variant.location || "-"}</td>
                         <td className="p-2">
                           {variant.currentStock <= variant.lowStockThreshold ? (
@@ -240,6 +262,17 @@ export function ProductDetails({ id }: ProductDetailsProps) {
                             </Badge>
                           )}
                         </td>
+                        <TableCell>
+                          {variant.flagStatus === "red" ? (
+                            <Badge variant="outline" className="bg-red-100 text-red-800">
+                              Red Flag
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-green-100 text-green-800">
+                              Green Flag
+                            </Badge>
+                          )}
+                        </TableCell>
                       </tr>
                     ))}
                   </tbody>
@@ -258,26 +291,26 @@ export function ProductDetails({ id }: ProductDetailsProps) {
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-sm">Cost Price:</span>
-                          <span className="text-sm font-medium">${formatNumber(variant.costPrice)}</span>
+                          <span className="text-sm font-medium">${variant.costPrice.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Selling Price:</span>
-                          <span className="text-sm font-medium">${formatNumber(variant.sellingPrice)}</span>
+                          <span className="text-sm font-medium">${variant.sellingPrice.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Profit Margin:</span>
                           <span className="text-sm font-medium">
-                            {formatNumber(((variant.sellingPrice - variant.costPrice) / variant.sellingPrice) * 100)}%
+                            {(((variant.sellingPrice - variant.costPrice) / variant.sellingPrice) * 100).toFixed(1)}%
                           </span>
                         </div>
                         <Separator />
                         <div className="flex justify-between">
                           <span className="text-sm">Current Stock:</span>
-                          <span className="text-sm font-medium">{formatNumber(variant.currentStock)}</span>
+                          <span className="text-sm font-medium">{variant.currentStock}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-sm">Low Stock Threshold:</span>
-                          <span className="text-sm font-medium">{formatNumber(variant.lowStockThreshold)}</span>
+                          <span className="text-sm font-medium">{variant.lowStockThreshold}</span>
                         </div>
                         {variant.location && (
                           <div className="flex justify-between">
@@ -285,6 +318,20 @@ export function ProductDetails({ id }: ProductDetailsProps) {
                             <span className="text-sm font-medium">{variant.location}</span>
                           </div>
                         )}
+                        <div className="flex justify-between">
+                          <span className="text-sm">Documentation:</span>
+                          <span className="text-sm font-medium">
+                            {variant.flagStatus === "red" ? (
+                              <Badge variant="outline" className="bg-red-100 text-red-800">
+                                Red Flag
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-green-100 text-green-800">
+                                Green Flag
+                              </Badge>
+                            )}
+                          </span>
+                        </div>
                         <div className="pt-2">
                           {variant.currentStock <= variant.lowStockThreshold ? (
                             <Badge variant="destructive" className="w-full justify-center">
@@ -333,4 +380,3 @@ export function ProductDetails({ id }: ProductDetailsProps) {
     </div>
   )
 }
-

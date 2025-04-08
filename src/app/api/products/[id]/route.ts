@@ -4,7 +4,7 @@ import Product from "@/lib/models/product"
 import mongoose from "mongoose"
 import Notification from "@/lib/models/notification"
 
-export async function GET(req: NextRequest, { params }:any) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectDB()
 
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, { params }:any) {
   }
 }
 
-export async function PUT(req: NextRequest, { params }:any) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectDB()
 
@@ -80,7 +80,7 @@ export async function PUT(req: NextRequest, { params }:any) {
   }
 }
 
-export async function DELETE(req: NextRequest, { params }:any) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     await connectDB()
 
@@ -112,4 +112,3 @@ export async function DELETE(req: NextRequest, { params }:any) {
     return NextResponse.json({ error: "Failed to delete product" }, { status: 500 })
   }
 }
-

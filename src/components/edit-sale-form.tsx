@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -20,6 +20,7 @@ const saleSchema = z.object({
   customer: z.string().optional(),
   paymentMethod: z.string().min(1, "Payment method is required"),
   paymentStatus: z.string().min(1, "Payment status is required"),
+  flagStatus: z.enum(["green", "red"]).default("green"), // Added flag status field
   notes: z.string().optional(),
 })
 
@@ -42,6 +43,7 @@ export function EditSaleForm({ id }: EditSaleFormProps) {
       customer: "",
       paymentMethod: "Cash",
       paymentStatus: "Completed",
+      flagStatus: "green",
       notes: "",
     },
   })
@@ -60,6 +62,7 @@ export function EditSaleForm({ id }: EditSaleFormProps) {
           customer: saleData.customer || "",
           paymentMethod: saleData.paymentMethod,
           paymentStatus: saleData.paymentStatus || "Completed",
+          flagStatus: saleData.flagStatus || "green", // Add flag status
           notes: saleData.notes || "",
         })
       } catch (error) {
@@ -86,6 +89,7 @@ export function EditSaleForm({ id }: EditSaleFormProps) {
         customer: data.customer,
         paymentMethod: data.paymentMethod,
         paymentStatus: data.paymentStatus,
+        flagStatus: data.flagStatus, // Add flag status
         notes: data.notes,
       })
 
@@ -202,6 +206,28 @@ export function EditSaleForm({ id }: EditSaleFormProps) {
                   )}
                 />
               </div>
+              <FormField
+                control={form.control}
+                name="flagStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Documentation Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select documentation status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="green">Green Flag</SelectItem>
+                        <SelectItem value="red">Red Flag</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>Indicates whether this sale has proper documentation</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
@@ -283,4 +309,3 @@ export function EditSaleForm({ id }: EditSaleFormProps) {
     </div>
   )
 }
-

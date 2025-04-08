@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
     const startDate = searchParams.get("startDate") || ""
     const endDate = searchParams.get("endDate") || ""
     const paymentStatus = searchParams.get("paymentStatus") || ""
+    const flagStatus = searchParams.get("flagStatus") || ""
     const page = Number.parseInt(searchParams.get("page") || "1")
     const limit = Number.parseInt(searchParams.get("limit") || "10")
     const skip = (page - 1) * limit
@@ -37,11 +38,17 @@ export async function GET(req: NextRequest) {
     }
 
     // Add payment status filter - only if a specific status is selected
-    if (paymentStatus) {
+    if (paymentStatus && paymentStatus !== "all") {
       query.paymentStatus = paymentStatus
     }
 
-    console.log("Query:", JSON.stringify(query, null, 2))
+    // Add flag status filter - only if a specific status is selected
+    if (flagStatus && flagStatus !== "all") {
+      query.flagStatus = flagStatus
+    }
+
+    // Log the query for debugging
+    console.log("Sales API Query:", JSON.stringify(query, null, 2))
 
     // Execute query
     const totalSales = await Sale.countDocuments(query)
@@ -89,6 +96,11 @@ export async function POST(req: NextRequest) {
     // Ensure payment status is either "Completed" or "Pending"
     if (!body.paymentStatus || (body.paymentStatus !== "Completed" && body.paymentStatus !== "Pending")) {
       body.paymentStatus = "Completed" // Default to Completed if not specified or invalid
+    }
+
+    // Ensure flag status is set
+    if (!body.flagStatus || (body.flagStatus !== "green" && body.flagStatus !== "red")) {
+      body.flagStatus = "green" // Default to green if not specified or invalid
     }
 
     // Calculate total amount and profit
@@ -187,4 +199,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to create sale" }, { status: 500 })
   }
 }
-

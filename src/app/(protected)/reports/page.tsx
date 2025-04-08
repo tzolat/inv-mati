@@ -13,7 +13,7 @@ import { redirect } from 'next/navigation';
 import React from 'react';
 import { useUser } from "@clerk/nextjs"
 
-export default async function ReportsPage() {
+export default  function ReportsPage() {
   const { user } = useUser()
    if(user?.publicMetadata.role !== 'admin') {
     redirect('/inventory')

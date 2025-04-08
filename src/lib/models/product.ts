@@ -10,6 +10,7 @@ const VariantSchema: Schema = new Schema({
   currentStock: { type: Number, required: true, default: 0 },
   lowStockThreshold: { type: Number, required: true, default: 5 },
   location: { type: String, required: false },
+  flagStatus: { type: String, enum: ["green", "red"], default: "green" }, // Added flag status field
 })
 
 // Schema for Product
@@ -29,4 +30,3 @@ const Product: Model<ProductType> =
   (mongoose.models.Product as Model<ProductType>) || mongoose.model<ProductType>("Product", ProductSchema)
 
 export default Product
-

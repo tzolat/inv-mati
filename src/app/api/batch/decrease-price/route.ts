@@ -28,6 +28,7 @@ export async function POST(req: Request) {
         return {
           ...variant,
           sellingPrice: Math.round(newPrice * 100) / 100, // Round to 2 decimal places
+          // No need to modify flagStatus as we're preserving it with the spread operator above
         }
       })
 
@@ -53,4 +54,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to decrease prices" }, { status: 500 })
   }
 }
-

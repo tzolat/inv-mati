@@ -20,7 +20,8 @@ const SaleSchema: Schema = new Schema({
   totalAmount: { type: Number, required: true },
   totalProfit: { type: Number, required: true },
   paymentMethod: { type: String, required: true, default: "Cash" },
-  paymentStatus: { type: String, required: true, default: "Completed" }, // Added with default value
+  paymentStatus: { type: String, required: true, default: "Completed" },
+  flagStatus: { type: String, enum: ["green", "red"], default: "green" }, // Added flag status field
   notes: { type: String, required: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
@@ -30,4 +31,3 @@ const SaleSchema: Schema = new Schema({
 const Sale: Model<SaleType> = (mongoose.models.Sale as Model<SaleType>) || mongoose.model<SaleType>("Sale", SaleSchema)
 
 export default Sale
-

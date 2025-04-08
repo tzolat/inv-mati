@@ -20,7 +20,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ColumnVisibility } from "@/components/column-visibility"
-import { formatNumber } from "@/utils/formatNumber"
 
 // Define column configuration
 interface ColumnDef {
@@ -44,6 +43,8 @@ export function SalesTable() {
   const [startDateFilter, setStartDateFilter] = useState<Date | undefined>(undefined)
   const [endDateFilter, setEndDateFilter] = useState<Date | undefined>(undefined)
   const [paymentStatusFilter, setPaymentStatusFilter] = useState("all")
+  // Add flag status state
+  const [flagStatusFilter, setFlagStatusFilter] = useState("all")
 
   // Add state for sorting
   const [sorting, setSorting] = useState<{ column: string; direction: "asc" | "desc" } | null>(null)
@@ -86,6 +87,15 @@ export function SalesTable() {
       id: "status",
       label: "Status",
       accessor: (sale) => sale.paymentStatus,
+      sortable: true,
+      canHide: true,
+      isVisible: true,
+    },
+    // Add flag status to the columns array
+    {
+      id: "flagStatus",
+      label: "Documentation",
+      accessor: (sale) => sale.flagStatus,
       sortable: true,
       canHide: true,
       isVisible: true,
@@ -147,8 +157,15 @@ export function SalesTable() {
       result = result.filter((sale) => sale.paymentStatus === paymentStatusFilter)
     }
 
+    // Add flag status to the filter logic
+    // In the useEffect for filtering:
+    // Apply flag status filter
+    if (flagStatusFilter && flagStatusFilter !== "all") {
+      result = result.filter((sale) => sale.flagStatus === flagStatusFilter)
+    }
+
     setFilteredSales(result)
-  }, [allSales, searchFilter, startDateFilter, endDateFilter, paymentStatusFilter])
+  }, [allSales, searchFilter, startDateFilter, endDateFilter, paymentStatusFilter, flagStatusFilter])
 
   // Function to handle column visibility changes
   const handleColumnVisibilityChange = (columnId: string, isVisible: boolean) => {
@@ -264,15 +281,18 @@ export function SalesTable() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-4">
+        {/* Update the SalesFilters component usage */}
         <SalesFilters
           onSearchChange={setSearchFilter}
           onStartDateChange={setStartDateFilter}
           onEndDateChange={setEndDateFilter}
           onPaymentStatusChange={setPaymentStatusFilter}
+          onFlagStatusChange={setFlagStatusFilter}
           searchValue={searchFilter}
           startDateValue={startDateFilter}
           endDateValue={endDateFilter}
           paymentStatusValue={paymentStatusFilter}
+          flagStatusValue={flagStatusFilter}
           exportParams={getExportParams()}
         />
         <ColumnVisibility
@@ -306,6 +326,7 @@ export function SalesTable() {
                   </TableHead>
                 )
               })}
+              {/* Add the flag status column to the table header and rows */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -322,7 +343,7 @@ export function SalesTable() {
                     <TableCell>{sale.createdAt ? format(new Date(sale.createdAt), "MMM dd, yyyy") : "N/A"}</TableCell>
                   )}
                   {columns.find((col) => col.id === "totalAmount")?.isVisible && (
-                    <TableCell>${formatNumber(sale.totalAmount)}</TableCell>
+                    <TableCell>${sale.totalAmount.toFixed(2)}</TableCell>
                   )}
                   {columns.find((col) => col.id === "status")?.isVisible && (
                     <TableCell>
@@ -338,8 +359,22 @@ export function SalesTable() {
                       </Badge>
                     </TableCell>
                   )}
+                  {columns.find((col) => col.id === "flagStatus")?.isVisible && (
+                    <TableCell>
+                      <Badge
+                        variant={sale.flagStatus === "red" ? "outline" : "outline"}
+                        className={
+                          sale.flagStatus === "red"
+                            ? "bg-red-100 text-red-800 hover:bg-red-100"
+                            : "bg-green-100 text-green-800 hover:bg-green-100"
+                        }
+                      >
+                        {sale.flagStatus === "red" ? "Red Flag" : "Green Flag"}
+                      </Badge>
+                    </TableCell>
+                  )}
                   {columns.find((col) => col.id === "actions")?.isVisible && (
-                    <TableCell className="text-left">
+                    <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="icon">
@@ -377,4 +412,3 @@ export function SalesTable() {
     </div>
   )
 }
-

@@ -27,6 +27,7 @@ export async function POST(req: Request) {
         return {
           ...variant,
           currentStock: variant.currentStock + quantity,
+          // No need to modify flagStatus as we're preserving it with the spread operator above
         }
       })
 
@@ -52,4 +53,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to add stock" }, { status: 500 })
   }
 }
-
